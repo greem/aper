@@ -1,0 +1,98 @@
+#
+# phishing_cleared_addresses is the list of addresses that have been confirmed 
+# to have been cleared (secured).  
+#
+# The DATE is the date it was cleared.
+#
+# The add-address-to-list.pl script will check this file and remove any 
+# addresses that have a cleared date that is more recent than the listing date
+#
+# There is no type included, since the type is not relevant to the
+# determination of when the addresses are cleared.
+#
+# List Format:
+#
+# ADDRESS,DATE
+#
+# The list is in alphabetical order.
+#
+a.d.kraneveld@uu.nl,20090508
+aharris20@elon.edu,20090827
+afyazzi@asu.edu,20090416
+anna.krzyzanowska@ec.europa.eu,20090728
+a.shairp@lipa.ac.uk,20090206
+a.thorne@strath.ac.uk,20090218
+avittori@asu.edu,20090416
+bbowers@mail.nih.gov,20090511
+bonev@cua.edu,20090714
+b.rattray@abcol.ac.uk,20090206
+bstitch1@my.westga.edu,20090501
+burn0280@umn.edu,20090623
+catherine.colomb-nancy@ec.europa.eu,20090728
+ccw@aber.ac.uk,20090901
+cjpark0519@neo.tamu.edu,20090717
+clem0193@umn.edu,20090224
+cmaynard@uoregon.edu,20081118
+c.mclauchlan@uq.edu.au,20090518
+dfscott@princeton.edu,20090827
+dgould@liverpool.ac.uk,20090212
+dick0375@umn.edu,20090224
+e.c.d.crossley@bham.ac.uk,20090212
+e.dudley-1@plymouth.ac.uk,20090212
+e.jackson1@salford.ac.uk,20090212
+gmw537@bham.ac.uk,20090212
+g.nabi@abdn.ac.uk,20090212
+h.r.fox@derby.ac.uk,20090212
+h-women@h-net.msu.edu,20090714
+j.armstrong@abertay.ac.uk,20081201
+jlcopenhaver@liberty.edu,20090317
+jinwei.zhang@newcastle.ac.uk,20090902
+j.m.parker@exeter.ac.uk,20090218
+joseph.betz@villanova.edu,20090414
+joseph.kinney@villanova.edu,20090414
+jrc30@sussex.ac.uk,20090406
+j.r.charles@sussex.ac.uk,20090406
+kate.duncan@asu.edu,20090415
+khale@state.pa.us,20090826
+k.l.ince@bham.ac.uk,20090204
+kservais@noctrl.edu,20090407
+lalitsingh@nus.edu.sg,20090821
+lbridg01@bucks.ac.uk,20090206
+lipu@cowi.dk,20090814
+ljackson@cchs.ua.edu,20090218
+lspaith@uwhealth.org,20090114
+luk.van-wassenhove@insead.edu,20090824
+mae@aber.ac.uk,20090901
+malcolm.lewis@otago.ac.nz,20090720
+marie.provine@asu.edu,20090416
+mark.donohue@babson.edu,20090715
+mark.perry@eds.com,20090623
+mark.woodland@drexelmed.edu,20090317
+maryanne.dowling@villanova.edu,20090414
+mcadm@wawm.k12.wi.us,20090407
+mcdavlin@dom.edu,20090415
+m.goodfellow@rhul.ac.uk,20090206
+michael.collins@mwsu.edu,20090819
+morag.campbell@stir.ac.uk,20090212
+mtanig@kansaigaidai.ac.jp,20090727
+m_young@ioe.ac.uk,20090417
+neha.b@nus.edu.sg,20090728
+nicole.schaefer@ec.europa.eu,20090728
+nrj7@leicester.ac.uk,20090527
+p.c.alcock@bham.ac.uk,20090121
+phills-meyer@uwhealth.org,20090114
+pilar.lopez@ec.europa.eu,20090728
+r.j.mcclelland@qub.ac.uk,20090326
+s.demel@gre.ac.uk,20090206
+sfw25@sussex.ac.uk,20090403
+sian.winston@liverpool.ac.uk,20090212
+s.j.hordern@bham.ac.uk,20090120
+s-mayfield@govst.edu,20090610
+sonia.seneviratne@env.ethz.ch,20090511
+steiner@cua.edu,20090804
+sthirsch@econ.berkeley.edu,20090218
+t.ashton@auckland.ac.nz,20090622
+teschf@wcsu.edu,20090121
+vetick@cua.edu,20090804
+westacott@alfred.edu,20090206
+wilsonb@perry.k12.mi.us,20090219
