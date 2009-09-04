@@ -1,6 +1,6 @@
 ####################################
 #  Exchange 2007 Powershell script to import/filter known Phishers
-#  Version 1.2
+#  Version 1.4
 #
 # About:
 #	The best way I could think of to put the list of known phishers to use was to import the email addresses
@@ -44,15 +44,16 @@
 # Revision History:
 #	03-18-2009: added code to remove cleared addresses
 #	05-04-2009: changed starting line for phishing_reply_addresses due to new type E
+#	09-04-2009: changed download URL's to reflect project move from Google to SourceForge
 #
 ####################################
 $error.clear()
 $erroractionpreference = "SilentlyContinue"
 Add-PSSnapin *exchange*
 $clnt = New-Object System.Net.WebClient
-$replyurl = "http://anti-phishing-email-reply.googlecode.com/svn/trunk/phishing_reply_addresses"
+$replyurl = "https://aper.svn.sourceforge.net/svnroot/aper/phishing_reply_addresses"
 $replyfile = "c:\admin\phishing_reply_addresses"
-$clearedurl = "http://anti-phishing-email-reply.googlecode.com/svn/trunk/phishing_cleared_addresses"
+$clearedurl = "https://aper.svn.sourceforge.net/svnroot/aper/phishing_cleared_addresses"
 $clearedfile = "c:\admin\phishing_cleared_addresses"
 $clnt.DownloadFile($replyurl,$replyfile)
 $clnt.DownloadFile($clearedurl,$clearedfile)
