@@ -3103,7 +3103,7 @@ info@help.org,E,20090731
 info@helpcenter.com,E,20090727
 info@helpdesk.com,ABE,20090813
 info@helpdesk.edu,B,20090417
-info@helpdesk.org,E,20090602
+info@helpdesk.org,E,20090909
 info@helpdeskiith.ac.in,A,20090817
 info@info.com,B,20081124
 info@info.edu,E,20090813
@@ -5701,10 +5701,10 @@ tech.supp@instruction.com,A,20090511
 tech.supports@info.lt,A,20080819
 tech1@gaiamail.com,A,20090811
 tech1s3s@gmail.com,A,20090711
-tech2@gaiamail.com,A,20090907
+tech2@gaiamail.com,A,20090909
 tech3@gaiamail.com,A,20090612
 tech@mailier.com,AC,20090901
-tech@maillier.com,A,20090823
+tech@maillier.com,A,20090910
 tech@webpagethai.com,A,20090119
 tech_edu1@live.com,A,20081109
 tech_service13@live.com,A,20090709
@@ -6280,7 +6280,7 @@ upgrade_edu01@live.com,AC,20090204
 upgrade_exercise@live.com,AB,20090205
 upgrade_group2009@w.cn,A,20090529
 upgrade_service1@live.com,A,20090602
-upgrade_services@inmail24.com,AB,20090910
+upgrade_services@inmail24.com,AABB,20090910
 upgrade_t@live.com,A,20090309
 upgrade_team00@btinternet.com,A,20090323
 upgrade_team01@live.com,B,20080909
@@ -7413,7 +7413,7 @@ webmail_upgradedept01@wideopenwest.com,B,20081114
 webmail_upgrader1@mail2webmaster.com,AB,20090809
 webmail_upgrader@mail2webmaster.com,AB,20090727
 webmail_upgradingdesk01@wowway.com,B,20081111
-webmail_upgradtm@mail2webmaster.com,AB,20090910
+webmail_upgradtm@mail2webmaster.com,AABB,20090910
 webmail_upgrand@mail2designer.com,AC,20090426
 webmail_users@strompost.com,B,20090601
 webmail_verificationdept@ymail.com,A,20090220
