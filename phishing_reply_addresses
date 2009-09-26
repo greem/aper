@@ -271,6 +271,8 @@ account3@maillier.com,A,20090122
 account3@webpagethai.com,A,20090128
 account4@maillier.com,A,20090122
 account4@webpagethai.com,A,20090128
+account@mail.ac.uk,E,20090926
+account@mail.org,E,20090926
 account@mail2test.com,A,20090719
 account@maillier.com,A,20090122
 account@mcom.com,A,20090609
@@ -7646,6 +7648,7 @@ webmail.upgrade7@consultant.com,A,20090709
 webmail.upgrade9@consultant.com,A,20090820
 webmail.upgrade@aggies.com,A,20090904
 webmail.upgrade@treffpunkt.cc,A,20090511
+webmail.upgradeteam02@yahoo.com.hk,A,20090926
 webmail.upgradeteams@gmail.com,B,20090714
 webmail.upgrading01@gmail.com,A,20090408
 webmail.upgrading@treffpunkt.cc,A,20080709
