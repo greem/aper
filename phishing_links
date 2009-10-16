@@ -46,6 +46,7 @@ app.formassembly.com/forms/view/105928,20090803
 app.formassembly.com/forms/view/106065,20090731
 app.formassembly.com/forms/view/106090,20090731
 app.formassembly.com/forms/view/106153,20090803
+app.formassembly.com/forms/view/106174,20091016
 app.formassembly.com/forms/view/106196,20090801
 app.formassembly.com/forms/view/106252,20090801
 app.formassembly.com/forms/view/106274,20090802
@@ -212,9 +213,13 @@ rpc.formmailhosting.com/showform.php?id=5854,20091014
 rpc.formmailhosting.com/showform.php?id=5860,20091014
 rpc.formmailhosting.com/showform.php?id=5861,20091014
 rpc.formmailhosting.com/showform.php?id=5865,20091014
+rpc.formmailhosting.com/showform.php?id=5878,20091016
 rpc.formmailhosting.com/showform.php?id=5899,20091015
 rpc.formmailhosting.com/showform.php?id=5908,20091016
+rpc.formmailhosting.com/showform.php?id=5909,20091016
 rpc.formmailhosting.com/showform.php?id=5910,20091016
+rpc.formmailhosting.com/showform.php?id=5919,20091016
+rpc.formmailhosting.com/showform.php?id=5921,20091016
 sealedlimit.c.la,20090915
 sealedmak37343.sup.fr,20091012
 secure.blueoctane.net//forms/KJPI87HK4YWH,20091002
@@ -384,7 +389,8 @@ www.logiforms.com/formdata/user_forms/23371_513390/75183,20090919
 www.logiforms.com/formdata/user_forms/23398_4744141/75343,20090921
 www.logiforms.com/formdata/user_forms/23457_1480326/75677,20091003
 www.logiforms.com/formdata/user_forms/23437_9872587/75523,20090928
-www.logiforms.com/formdata/user_forms/23529_9487648/75999,20091015
+www.logiforms.com/formdata/user_forms/23529_9487648/75999,20091016
+www.logiforms.com/formdata/user_forms/23535_1830238/76027,20091016
 www.losnaranjos23.com/phpformgenerator/use/oncedial/form1.html,20090916
 www.mailhelpdirect.com/secure/mailupdate/verify/index.php,20091003
 www.mailhelpdirect.org/_vti_ml_update/secure/update,20090704
