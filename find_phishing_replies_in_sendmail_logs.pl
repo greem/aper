@@ -59,7 +59,7 @@ if ($list) {	# just print out a list if user gave --list
 }
 
 # build the regex of what to look for....
-my $re = qr/^(.*)\s\w+\ssendmail\[\d+\]:\s([\d\w]+):\s(\w+)=<([\.\w%+-]+@[\w.-]+\.\w{2,4})>/i;
+my $re = qr/^(\S+\s+\S+\s+\S+)\s\S+\ssendmail\[\d+\]:\s([\d\w]+):\s(\w+)=<([\.\w%+-]+@[\w.-]+\.\w{2,4})>/i;
 #	$1 = Jan  1 10:14:00
 #	$2 = m098asdf898
 #	$3 = to/from
