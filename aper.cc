@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.3 2010/04/02 21:24:10 shollatz Exp $
+$Id: aper.cc,v 1.4 2010/04/05 17:03:20 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -255,6 +255,7 @@ typedef std::list<std::string> Comments;
 
 std::string trimspace( std::string s, trimspec trim = ENDS );
 std::string split( std::string s, char c = tokcsv );
+std::string tolowercase( std::string s );
 errstate errnotify( errstate err, std::string extrainfo = "" );
 
 bool loadaperdb( void );
@@ -287,11 +288,14 @@ int main( int argc, char *argv[] )
 	{
 		std::string opt = *++argv;
 
-		if ( dbmode.none() && opt == "help" ) { return errnotify( EUSE ); }
+		if ( dbmode.none() )
+		{
+			if ( opt == "help" ) { return errnotify( EUSE ); }
 
-		if ( dbmode.none() && opt == "cleared" ) { dbmode.set( cleared ); continue; }
-		if ( dbmode.none() && opt == "links" ) { dbmode.set( links ); continue; }
-		if ( dbmode.none() && opt == "reply" ) { dbmode.set( reply ); continue; }
+			if ( opt == "cleared" ) { dbmode.set( cleared ); continue; }
+			if ( opt == "links" ) { dbmode.set( links ); continue; }
+			if ( opt == "reply" ) { dbmode.set( reply ); continue; }
+		}
 
 		if ( dbmode.any() ) { datafile = opt; break; }
 	}
@@ -403,7 +407,7 @@ bool loadaperreply( std::istream *f )
 
 	while ( getline( *f, s ) )
 	{
-		s = trimspace( s, ENDS );
+		s = tolowercase( trimspace( s, ENDS ) );
 		if ( s.empty() ) continue;
 
 		if ( s[0] == tokcomment )
@@ -468,7 +472,7 @@ bool setapercleared( std::istream *f )
 
 	while ( getline( *f, s ) )
 	{
-		s = trimspace( s, ENDS );
+		s = tolowercase( trimspace( s, ENDS ) );
 		if ( s.empty() ) continue;
 		if ( s[0] == tokcomment ) continue;
 
@@ -499,7 +503,7 @@ bool loadapercleared( std::istream * f )
 
 	while ( getline( *f, s ) )
 	{
-		s = trimspace( s, ENDS );
+		s = tolowercase( trimspace( s, ENDS ) );
 		if ( s.empty() ) continue;
 
 		if ( s[0] == tokcomment )
@@ -559,7 +563,7 @@ bool loadaperlinks( std::istream *f )
 
 	while ( getline( *f, s ) )
 	{
-		s = trimspace( s, ENDS );
+		s = tolowercase( trimspace( s, ENDS ) );
 		if ( s.empty() ) continue;
 
 		if ( s[0] == tokcomment )
@@ -649,7 +653,7 @@ bool loaduserreply( std::istream *f )
 
 	while ( getline( *f , s ) )
 	{
-		s = trimspace( s, ALL );
+		s = tolowercase( trimspace( s, ALL ) );
 		if ( s.empty() ) continue;
 		if ( s[0] == tokcomment ) continue;
 			
@@ -711,7 +715,7 @@ bool loaduserlinks( std::istream *f )
 
 	while ( getline( *f, s ) )
 	{
-		s = trimspace( s, ENDS );
+		s = tolowercase( trimspace( s, ENDS ) );
 		if ( s.empty() ) continue;
 		if ( s[0] == tokcomment ) continue;
 
@@ -765,7 +769,7 @@ bool loadusercleared( std::istream *f )
 
 	while ( getline( *f, s ) )
 	{
-		s = trimspace( s, ENDS );
+		s = tolowercase( trimspace( s, ENDS ) );
 		if ( s.empty() ) continue;
 		if ( s[0] == tokcomment ) continue;
 
@@ -1202,5 +1206,15 @@ std::string split( std::string s, char c )
 		++itr;
 	}
 
+	return ( s );
+}
+
+/////////////////////////////////////////////////////
+//      tolowercase                                //
+/////////////////////////////////////////////////////
+
+std::string tolowercase( std::string s )
+{
+	std::transform( s.begin(), s.end(), s.begin(), tolower );
 	return ( s );
 }
