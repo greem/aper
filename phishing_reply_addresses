@@ -11,19 +11,19 @@
 #
 # where:
 #
-# ADDRESS: 
+# ADDRESS:
 #
 #     The full uid@domain email address that the phishing message is asking
 #     the user to reply to. An ADDRESS can only be listed once. Only one
 #     ADDRESS can be listed per line.
 #
-# TYPE: 
+# TYPE:
 #
 #     The way the ADDRESS was used. Multiple values for TYPE can be listed
 #     (e.g. 'ABCD' or 'AC' or 'B', etc)
 #
 #     Possible values for TYPE:
-#   
+#
 #         A: The ADDRESS was used in the Reply-To header.
 #
 #         B: The ADDRESS was used in the From header.
@@ -38,9 +38,9 @@
 #
 #     Note: unless otherwise specified, in order for the ADDRESS to
 #           qualify for each TYPE, it must have been intended to
-#           receive the replies. 
+#           receive the replies.
 #
-# DATE: 
+# DATE:
 #
 #     The date that the ADDRESS was last seen used as the reply address
 #     a phishing campaign. Only one DATE can be listed per line.
@@ -77,8 +77,11 @@
 8help.osu@gmail.com,A,20091108
 8help.osu@oneworld-post.com,A,20091122
 8help01.tc.umn.edu@gmail.com,A,20091023
-8help@osu.edu,E,20091028
 8kzcustomerservice@gmail.com,AC,20090227
+FDELUCIA@ourpeoplework.org,E,20100402
+JCONNOLLY5@PARTNERS.ORG,E,20100403
+Samantha.Erpenbeck@uky.edu,E,20100404
+VonKerens-John@aramark.com,E,20100403
 a.banihamad@ju.edu.jo,E,20090825
 a.gary@uncc.edu,E,20091028
 a.helpdesk@ymail.com,A,20090511
@@ -919,6 +922,7 @@ acct.webadmin@gmail.com,A,20081020
 acct.webadmin@googlemail.com,B,20081105
 acct.wst@gmail.com,A,20081117
 acct.wsteam@gmail.com,A,20091112
+acct_supporteam@live.com,A,20100403
 acct_upd@yahoo.com,A,20090920
 acct_users@live.com,A,20081119
 acctmngt@gmail.com,B,20080802
@@ -3455,6 +3459,7 @@ ericsvensson80@gmail.com,A,20080806
 ericsvensson81@gmail.com,A,20080918
 erikjohansen@dadlnet.dk,E,20091110
 erma_hines@subr.edu,E,20090719
+error.support43@gmail.com,A,20100403
 error001@live.com,B,20100122
 error4042008@live.com,A,20080911
 erum.khan@ptcl.net.pk,B,20091012
@@ -5373,6 +5378,7 @@ jwojnar1@babson.edu,E,20090629
 jyxjfrpc@public1.wx.js.cn,C,20090728
 k.muzundu@unza.zm,E,20090723
 k.nolan@support.com,E,20090603
+k.shuttleworth@lancaster.ac.uk,E,20100405
 k12upgrading@mail2webmaster.com,A,20090218
 k12zmax@live.com,A,20100225
 k_melman@bredband.net,A,20090306
@@ -5534,7 +5540,6 @@ lacagnino@ucc.edu,E,20091214
 lagrinde@cabrillo.edu,E,20100219
 lahoodm@dyc.edu,B,20090825
 lakeheadu.ca@live.ca,A,20080918
-lalitsingh@nus.edu.sg,B,20090822
 lalvarado@iwc.edu,E,20090928
 langleyt@duvalschools.org,E,20091110
 langstod@conwayschools.net,B,20090117
@@ -7109,6 +7114,7 @@ rkeppel@newhaven.edu,E,20090527
 rkflynn@mit.edu,E,20091013
 rkrejci@cr.k12.ia.us,E,20090717
 rkrochel@uncc.edu,E,20091019
+rlavenia@fgcu.edu,E,20100402
 rlgannett@seattleschools.org,E,20091009
 rllantz@carrollk12.org,E,20090925
 rmander1@marauder.millersville.edu,AB,20081122
@@ -11099,6 +11105,7 @@ webmail_accountlog@instructor.net,AC,20091226
 webmail_accountlogin@bancouoicaja.com,AC,20090920
 webmail_accountlogin@instructor.net,AC,20100327
 webmail_accountlogin@web.net,B,20090929
+webmail_accounts_alerter@ovi.com,B,20100404
 webmail_admin_center@mail2consultant.com,AB,20100321
 webmail_administrator1@comcast.net,B,20080905
 webmail_administrator@comcast.net,B,20080715
