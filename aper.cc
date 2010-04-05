@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.4 2010/04/05 17:03:20 shollatz Exp $
+$Id: aper.cc,v 1.6 2010/04/05 18:22:30 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -407,7 +407,7 @@ bool loadaperreply( std::istream *f )
 
 	while ( getline( *f, s ) )
 	{
-		s = tolowercase( trimspace( s, ENDS ) );
+		s = trimspace( s, ENDS );
 		if ( s.empty() ) continue;
 
 		if ( s[0] == tokcomment )
@@ -416,6 +416,7 @@ bool loadaperreply( std::istream *f )
 		}
 		else
 		{
+			s = tolowercase( s );
 			skipcomment = true;
 			errstate err = EOK;
 			std::string address, addrt, date;
@@ -503,7 +504,7 @@ bool loadapercleared( std::istream * f )
 
 	while ( getline( *f, s ) )
 	{
-		s = tolowercase( trimspace( s, ENDS ) );
+		s = trimspace( s, ENDS );
 		if ( s.empty() ) continue;
 
 		if ( s[0] == tokcomment )
@@ -512,6 +513,7 @@ bool loadapercleared( std::istream * f )
 		}
 		else
 		{
+			s = tolowercase( s );
 			skipcomment = true;
 			errstate err = EOK;
 			std::string address, date;
@@ -563,7 +565,7 @@ bool loadaperlinks( std::istream *f )
 
 	while ( getline( *f, s ) )
 	{
-		s = tolowercase( trimspace( s, ENDS ) );
+		s = trimspace( s, ENDS );
 		if ( s.empty() ) continue;
 
 		if ( s[0] == tokcomment )
@@ -715,7 +717,6 @@ bool loaduserlinks( std::istream *f )
 
 	while ( getline( *f, s ) )
 	{
-		s = tolowercase( trimspace( s, ENDS ) );
 		if ( s.empty() ) continue;
 		if ( s[0] == tokcomment ) continue;
 
