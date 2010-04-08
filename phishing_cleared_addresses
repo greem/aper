@@ -1,10 +1,10 @@
 #
-# phishing_cleared_addresses is the list of addresses that have been confirmed 
-# to have been cleared (secured).  
+# phishing_cleared_addresses is the list of addresses that have been confirmed
+# to have been cleared (secured).
 #
 # The DATE is the date it was cleared.
 #
-# The add-address-to-list.pl script will check this file and remove any 
+# The add-address-to-list.pl script will check this file and remove any
 # addresses that have a cleared date that is more recent than the listing date
 #
 # There is no type included, since the type is not relevant to the
@@ -44,6 +44,7 @@ aslang@syr.edu,20091106
 asoto@ghchs.com,20090918
 avittori@asu.edu,20090416
 b.atkins@bolton.ac.uk,20100303
+b.griffin@imperial.ac.uk,20100408
 b.rattray@abcol.ac.uk,20090206
 barry.croft@uwe.ac.uk,20100303
 bbowers@mail.nih.gov,20090511
@@ -51,8 +52,8 @@ berger7@tcnj.edu,20090915
 bonev@cua.edu,20090714
 boriek@bcm.tmc.edu,20100113
 brian.dewitt@kzoo.edu,20091130
-brigitte.brown@cms.k12.nc.us,20100125
 bricknar@jmu.edu,20100401
+brigitte.brown@cms.k12.nc.us,20100125
 brust.15@osu.edu,20091107
 bstitch1@my.westga.edu,20090501
 burn0280@umn.edu,20090623
@@ -225,6 +226,7 @@ r.j.mcclelland@qub.ac.uk,20090326
 r.k.al-dadah@bham.ac.uk,20091007
 r.w.daisley@bton.ac.uk,20100304
 r.w.hewson@leeds.ac.uk,20090918
+raul.torres@imperial.ac.uk,20100408
 rita.sacks@cengage.com,20091221
 rmaple@kumc.edu,20091022
 ronald.droste@uottawa.ca,20100216
