@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.8 2010/04/07 22:45:06 shollatz Exp $
+$Id: aper.cc,v 1.12 2010/04/09 22:12:23 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -131,7 +131,7 @@ Copyright (C) 2010 University of Minnesota.  All rights reserved.
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <list>
+#include <vector>
 #include <map>
 #include <set>
 #include <sstream>
@@ -169,7 +169,6 @@ enum errstate
 	EAPERDB,	// cannot load APER database
 	EUSERDB,	// cannot load user database
 	EWAPERDB,	// cannot write APER database
-	EMEM,		// cannot allocate node memory for database entry
 	EUNKNOWN	// we shouldn't need this, but...
 };
 
@@ -189,13 +188,19 @@ class APERnode
 public:
 	APERnode( void );
 	APERnode( std::string date );
+	virtual ~APERnode( void ) {}
 
-	inline std::string date( void ) const { return ( _date ); }
-	bool date( std::string d );
+	std::string date( void ) const { return ( _date ); }
+	void date( std::string d ) { _date = d; }
 	bool isvaliddate( std::string d ) const;
-	inline bool isnewer( std::string d ) const { return ( _date < d ); }
 
-	virtual bool address( std::string a ) = 0;
+	bool isnewer( std::string d ) const;
+
+	virtual void address( std::string a ) = 0;
+	virtual std::string address( void ) const = 0;
+	virtual bool isvalidaddress( std::string ) const = 0;
+
+	virtual void write( std::ostream &f ) = 0;
 
 private:
 	std::string _date;
@@ -208,16 +213,19 @@ class APERreply : public APERnode
 public:
 	APERreply( void );
 
-	std::string address( void ) const;
-	bool address( std::string a );
+	std::string address( void ) const { return ( _address ); }
+	void address( std::string a ) { _address = a; }
 	bool isvalidaddress( std::string a ) const;
 
 	std::string addrtype( void ) const;
-	bool addrtype( std::string addrt );
+	void addrtype( std::string addrt );
 	bool isvalidaddrtype( std::string addrt ) const;
 
-	inline void clear( void ) { _iscleared = true; }
-	inline bool iscleared( void ) const { return _iscleared; }
+	void clear( void ) { _iscleared = true; }
+	void unclear( void ) { _iscleared = false; }
+	bool iscleared( void ) const { return _iscleared; }
+
+	void write( std::ostream &f );
 
 private:
 	std::string _address;
@@ -230,9 +238,11 @@ class APERlinks : public APERnode
 public:
 	APERlinks( void );
 
-	std::string address( void ) const;
-	bool address( std::string a );
-	bool isvalidaddress( std::string address );
+	std::string address( void ) const { return ( _address ); }
+	void address( std::string a ) { _address = a; }
+	bool isvalidaddress( std::string address ) const;
+
+	void write( std::ostream &f );
 
 private:
 	std::string _address;
@@ -243,16 +253,18 @@ class APERcleared : public APERnode
 public:
 	APERcleared( void );
 
-	std::string address( void ) const;
-	bool address( std::string a );
-	bool isvalidaddress( std::string address );
+	std::string address( void ) const { return ( _address ); }
+	void address( std::string a ) { _address = a; }
+	bool isvalidaddress( std::string address ) const;
+
+	void write( std::ostream &f );
 
 private:
 	std::string _address;
 };
 
 typedef std::map<std::string, APERnode *> APERdb;
-typedef std::list<std::string> Comments;
+typedef std::vector<std::string> Comments;
 
 std::string trimspace( std::string s, trimspec trim = ENDS );
 std::string split( std::string s, char c = tokcsv );
@@ -339,7 +351,6 @@ errstate errnotify( errstate err, std::string extrainfo )
 		case EAPERDB:	msg = "Cannot load APER database"; break;
 		case EUSERDB:	msg = "Cannot load user database"; break;
 		case EWAPERDB:	msg = "Cannot write APER database"; break;
-		case EMEM:		msg = "Cannot allocate memory for entry"; break;
 		case ELFILE:	msg = "Cannot open links file"; break;
 	}
 
@@ -425,22 +436,21 @@ bool loadaperreply( std::istream *f )
 			std::istringstream iss( split( s ) );
 			iss >> address >> addrt >> date;
 
-			APERreply *node = new APERreply;
-			if ( ! node )
-			{
-				errnotify( EMEM );
-				return ( false );
-			}
+			APERreply *node = new APERreply();
 
-			if ( ! node->address( address ) ) err = errnotify( EADDRESS, address );
-			if ( ! node->addrtype( addrt ) ) err = errnotify( EATYPE, addrt );
-			if ( ! node->date( date ) ) err = errnotify( EDATE, date );
+			if ( ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address );
+			if ( ! node->isvalidaddrtype( addrt ) ) err = errnotify( EATYPE, addrt );
+			if ( ! node->isvaliddate( date ) ) err = errnotify( EDATE, date );
 
 			if ( err != EOK )
 			{
 				free( node );
 				return ( false );
 			}
+
+			node->address( address );
+			node->addrtype( addrt );
+			node->date( date );
 
 			if ( aperdb.count( address ) == 0 )
 			{
@@ -450,7 +460,7 @@ bool loadaperreply( std::istream *f )
 			{
 				free( node );
 
-				if ( aperdb[ address ]->isnewer( date ) )
+				if ( ! aperdb[ address ]->isnewer( date ) )
 					aperdb[ address ]->date( date );
 
 				APERreply *p = dynamic_cast<APERreply *>( aperdb[ address ] );
@@ -480,23 +490,38 @@ bool setapercleared( std::istream *f )
 
 		std::string address, date;
 		std::istringstream iss( split( s ) );
-		iss >> address;
+		iss >> address >> date;
+
+		APERreply *node = new APERreply();
+		
+		errstate err = EOK;
+		if ( ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address );
+		if ( ! node->isvaliddate( date ) ) err = errnotify( EDATE, date );
+
+		if ( err != EOK )
+		{
+			free( node );
+			return ( false );
+		}
+
+		node->address( address );
+		node->date( date );
 
 		if ( aperdb.count( address ) > 0 )
 		{
-			APERreply *p = dynamic_cast<APERreply *>( aperdb[ address ] );
-			p->clear();
+			free( node );
+
+			if ( ! aperdb[ address ]->isnewer( date ) )
+			{
+				APERreply *p = dynamic_cast<APERreply *>( aperdb[ address ] );
+				p->clear();
+				p->date( date );
+			}
 		}
 		else
 		{
-			APERreply *node = new APERreply;
-			if ( ! node )
-			{
-				errnotify( EMEM );
-				return ( false );
-			}
-			node->clear();
-			aperdb[ address ] = node;
+				node->clear();
+				aperdb[ address ] = node;
 		}
 	}
 
@@ -534,20 +559,18 @@ bool loadapercleared( std::istream * f )
 			iss >> address >> date;
 
 			APERcleared *node = new APERcleared;
-			if ( ! node )
-			{
-				errnotify( EMEM );
-				return ( false );
-			}
 
-			if ( ! node->address( address ) ) err = errnotify( EADDRESS, address );
-			if ( ! node->date( date ) ) err = errnotify( EDATE, date );
+			if ( ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address );
+			if ( ! node->isvaliddate( date ) ) err = errnotify( EDATE, date );
 
 			if ( err != EOK )
 			{
 				free( node );
 				return ( false );
 			}
+
+			node->address( address );
+			node->date( date );
 
 			if ( aperdb.count( address ) == 0 )
 			{
@@ -557,7 +580,7 @@ bool loadapercleared( std::istream * f )
 			{
 				free( node );
 
-				if ( aperdb[ address ]->isnewer( date ) )
+				if ( ! aperdb[ address ]->isnewer( date ) )
 					aperdb[ address ]->date( date );
 			}
 		}
@@ -594,20 +617,18 @@ bool loadaperlinks( std::istream *f )
 			iss >> address >> date;
 
 			APERlinks *node = new APERlinks;
-			if ( ! node )
-			{
-				errnotify( EMEM );
-				return ( false );
-			}
 
-			if ( ! node->address( address ) ) err = errnotify( EADDRESS, address );
-			if ( ! node->date( date ) ) err = errnotify( EDATE, date );
+			if ( ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address );
+			if ( ! node->isvaliddate( date ) ) err = errnotify( EDATE, date );
 
 			if ( err != EOK )
 			{
 				free( node );
 				return ( false );
 			}
+
+			node->address( address );
+			node->date( date );
 
 			if ( aperdb.count( address ) == 0 )
 			{
@@ -617,7 +638,7 @@ bool loadaperlinks( std::istream *f )
 			{
 				free( node );
 
-				if ( aperdb[ address ]->isnewer( date ) )
+				if ( ! aperdb[ address ]->isnewer( date ) )
 					aperdb[ address ]->date( date );
 			}
 		}
@@ -677,22 +698,11 @@ bool loaduserreply( std::istream *f )
 		std::istringstream iss( split( s ) );
 		iss >> address >> addrt >> date;
 
-		if ( ! address.empty() && aperdb.count( address ) > 0 )
-		{
-			APERreply *p = dynamic_cast<APERreply *>( aperdb[ address ] );
-			if ( p->iscleared() ) continue;
-		}
+		APERreply *node = new APERreply();
 
-		APERreply *node = new APERreply;
-		if ( ! node )
-		{
-			errnotify( EMEM );
-			return ( false );
-		}
-
-		if ( ! node->address( address ) ) err = errnotify( EADDRESS, address );
-		if ( ! node->addrtype( addrt ) ) err = errnotify( EATYPE, addrt );
-		if ( ! node->date( date ) ) err = errnotify( EDATE, date );
+		if ( ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address );
+		if ( ! node->isvalidaddrtype( addrt ) ) err = errnotify( EATYPE, addrt );
+		if ( ! node->isvaliddate( date ) ) err = errnotify( EDATE, date );
 
 		if ( err != EOK )
 		{
@@ -700,19 +710,30 @@ bool loaduserreply( std::istream *f )
 			return ( false );
 		}
 
+		node->address( address );
+		node->addrtype( addrt );
+		node->date( date );
+
 		if ( aperdb.count( address ) == 0 )
 		{
 			aperdb[ address ] = node;
 		}
 		else
 		{
-			free( node );
-
-			if ( aperdb[ address ]->isnewer( date ) )
-				aperdb[ address ]->date( date );
-
 			APERreply *p = dynamic_cast<APERreply *>( aperdb[ address ] );
+
+			if ( p->iscleared() )
+			{
+				if ( node->isnewer( p->date() ) )
+				{
+					p->date( date );
+					p->unclear();
+				}
+			}
+
 			if ( p->addrtype() != addrt ) p->addrtype( addrt );
+
+			free( node );
 		}
 	}
 
@@ -739,20 +760,18 @@ bool loaduserlinks( std::istream *f )
 		iss >> address >> date;
 
 		APERlinks *node = new APERlinks;
-		if ( ! node )
-		{
-			errnotify( EMEM );
-			return ( false );
-		}
 
-		if ( ! node->address( address ) ) err = errnotify( EADDRESS, address );
-		if ( ! node->date( date ) ) err = errnotify( EDATE, date );
+		if ( ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address );
+		if ( ! node->isvaliddate( date ) ) err = errnotify( EDATE, date );
 
 		if ( err != EOK )
 		{
 			free( node );
 			return ( false );
 		}
+
+		node->address( address );
+		node->date( date );
 
 		if ( aperdb.count( address ) == 0 )
 		{
@@ -762,7 +781,7 @@ bool loaduserlinks( std::istream *f )
 		{
 			free( node );
 
-			if ( aperdb[ address ]->isnewer( date ) )
+			if ( ! aperdb[ address ]->isnewer( date ) )
 				aperdb[ address ]->date( date );
 		}
 	}
@@ -793,20 +812,18 @@ bool loadusercleared( std::istream *f )
 		iss >> address >> date;
 
 		APERcleared *node = new APERcleared;
-		if ( ! node )
-		{
-			errnotify( EMEM );
-			return ( false );
-		}
 
-		if ( ! node->address( address ) ) err = errnotify( EADDRESS, address );
-		if ( ! node->date( date ) ) err = errnotify( EDATE, date );
+		if ( ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address );
+		if ( ! node->isvaliddate( date ) ) err = errnotify( EDATE, date );
 
 		if ( err != EOK )
 		{
 			free( node );
 			return ( false );
 		}
+
+		node->address( address );
+		node->date( date );
 
 		if ( aperdb.count( address ) == 0 )
 		{
@@ -816,7 +833,7 @@ bool loadusercleared( std::istream *f )
 		{
 			free( node );
 
-			if ( aperdb[ address ]->isnewer( date ) )
+			if ( ! aperdb[ address ]->isnewer( date ) )
 				aperdb[ address ]->date( date );
 		}
 	}
@@ -827,8 +844,6 @@ bool loadusercleared( std::istream *f )
 /////////////////////////////////////////////////////
 //      writeaperdb                                //
 /////////////////////////////////////////////////////
-// we can refactor this into specific write functions, but that's too
-// much work.
 
 bool writeaperdb( void )
 {
@@ -842,31 +857,14 @@ bool writeaperdb( void )
 	}
 
 	for ( Comments::iterator itr = comments.begin(); itr != comments.end(); ++itr )
-	{
 		ofs << *itr << std::endl;
-	}
-
-	std::string s;
 
 	for ( APERdb::iterator itr = aperdb.begin(); itr != aperdb.end(); ++itr )
-	{
-		if ( APERreply *q = dynamic_cast<APERreply *>( itr->second ) )
-		{
-			if ( q->iscleared() ) continue;
-			s = q->address() + tokcsv + q->addrtype() + tokcsv + q->date();
-		}
-
-		if ( APERlinks *q = dynamic_cast<APERlinks *>( itr->second ) )
-			s = q->address() + tokcsv + q->date();
-
-		if ( APERcleared *q = dynamic_cast<APERcleared *>( itr->second ) )
-			s = q->address() + tokcsv + q->date();
-
-		if ( ! s.empty() ) ofs << s << std::endl;
-	}
+		itr->second->write( ofs );
 
 	ofs.close();
 
+	std::string s;
 	if ( dbmode.test( reply ) ) s = replyfile;
 	if ( dbmode.test( links ) ) s = linksfile;
 	if ( dbmode.test( cleared ) ) s = replyclearedfile;
@@ -885,10 +883,7 @@ bool writeaperdb( void )
 //      APERnode::APERnode                         //
 /////////////////////////////////////////////////////
 
-APERnode::APERnode( std::string d )
-{
-	date( d );
-}
+APERnode::APERnode( std::string d ) : _date( d ) {}
 
 APERnode::APERnode( void ) {}
 
@@ -936,21 +931,33 @@ bool APERnode::isvaliddate( std::string date ) const
 }
 
 /////////////////////////////////////////////////////
-//      APERnode::date                             //
+//      APERnode::isnewer                          //
 /////////////////////////////////////////////////////
+// is the node newer than the date given?
 
-bool APERnode::date( std::string d )
+bool APERnode::isnewer( std::string date ) const
 {
-	return ( isvaliddate( d ) ? _date = d, true : false );
+	if ( _date > date ) return ( true );
+	if ( _date == date || _date < date ) return ( false );
 }
 
 /////////////////////////////////////////////////////
 //      APERreply::APERreply                       //
 /////////////////////////////////////////////////////
 
-APERreply::APERreply( void )
+APERreply::APERreply( void ) : _iscleared( false ) {}
+
+/////////////////////////////////////////////////////
+//      AEPRreply::write                           //
+/////////////////////////////////////////////////////
+
+void APERreply::write( std::ostream &f )
 {
-	_iscleared = false;
+	if ( ! iscleared() )
+	{
+		std::string s = address() + tokcsv + addrtype() + tokcsv + date();
+		if ( ! s.empty() ) f << s << std::endl;
+	}
 }
 
 /////////////////////////////////////////////////////
@@ -998,20 +1005,6 @@ bool APERreply::isvalidaddress( std::string address ) const
 }
 
 /////////////////////////////////////////////////////
-//      APERreply::address                         //
-/////////////////////////////////////////////////////
-
-std::string APERreply::address( void ) const
-{
-	return ( _address );
-}
-
-bool APERreply::address( std::string a )
-{
-	return ( isvalidaddress( a ) ? _address = a, true : false );
-}
-
-/////////////////////////////////////////////////////
 //      APERreply::addrtype                        //
 /////////////////////////////////////////////////////
 
@@ -1027,10 +1020,8 @@ std::string APERreply::addrtype( void ) const
 	return ( s );
 }
 
-bool APERreply::addrtype( std::string addrt )
+void APERreply::addrtype( std::string addrt )
 {
-	if ( ! isvalidaddrtype( addrt ) ) return ( false );
-
 	std::string::iterator itr = addrt.begin();
 	std::string::iterator itrE = addrt.end();
 
@@ -1039,8 +1030,6 @@ bool APERreply::addrtype( std::string addrt )
 		_addrt.insert( std::toupper( *itr ) );
 		++itr;
 	}
-
-	return ( true );
 }
 
 /////////////////////////////////////////////////////
@@ -1063,17 +1052,13 @@ bool APERreply::isvalidaddrtype( std::string addrt ) const
 APERlinks::APERlinks( void ) {}
 
 /////////////////////////////////////////////////////
-//      APERlinks::address                         //
+//      APERlinks::write                           //
 /////////////////////////////////////////////////////
 
-std::string APERlinks::address( void ) const
+void APERlinks::write( std::ostream &f )
 {
-	return ( _address );
-}
-
-bool APERlinks::address( std::string a )
-{
-	return ( isvalidaddress( a ) ? _address = a, true : false );
+	std::string s = address() + tokcsv + date();
+	if ( ! s.empty() ) f << s << std::endl;
 }
 
 /////////////////////////////////////////////////////
@@ -1083,7 +1068,7 @@ bool APERlinks::address( std::string a )
 // basically, some.thing.more ==> good format.
 // there are no RFC-compliant checks (except one).
 
-bool APERlinks::isvalidaddress( std::string address )
+bool APERlinks::isvalidaddress( std::string address ) const
 {
 	if ( address.empty() ) return ( false );
 
@@ -1114,24 +1099,20 @@ bool APERlinks::isvalidaddress( std::string address )
 APERcleared::APERcleared( void ) {}
 
 /////////////////////////////////////////////////////
-//      APERcleared::address                       //
+//      APERcleared::write                         //
 /////////////////////////////////////////////////////
 
-bool APERcleared::address( std::string a )
+void APERcleared::write( std::ostream &f )
 {
-	return ( isvalidaddress( a ) ? _address = a, true : false );
-}
-
-std::string APERcleared::address( void ) const
-{
-	return ( _address );
+	std::string s = address() + tokcsv + date();
+	if ( ! s.empty() ) f << s << std::endl;
 }
 
 /////////////////////////////////////////////////////
 //      APERcleared::isvalidaddess                 //
 /////////////////////////////////////////////////////
 
-bool APERcleared::isvalidaddress( std::string address )
+bool APERcleared::isvalidaddress( std::string address ) const
 {
 	APERreply n;
 
