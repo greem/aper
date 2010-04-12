@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.12 2010/04/09 22:12:23 shollatz Exp $
+$Id: aper.cc,v 1.13 2010/04/12 20:20:46 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -722,13 +722,10 @@ bool loaduserreply( std::istream *f )
 		{
 			APERreply *p = dynamic_cast<APERreply *>( aperdb[ address ] );
 
-			if ( p->iscleared() )
+			if ( node->isnewer( p->date() ) )
 			{
-				if ( node->isnewer( p->date() ) )
-				{
-					p->date( date );
-					p->unclear();
-				}
+				if ( p->iscleared() ) p->unclear();
+				p->date( date );
 			}
 
 			if ( p->addrtype() != addrt ) p->addrtype( addrt );
