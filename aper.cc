@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.13 2010/04/12 20:20:46 shollatz Exp $
+$Id: aper.cc,v 1.14 2010/04/14 22:24:25 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -444,7 +444,7 @@ bool loadaperreply( std::istream *f )
 
 			if ( err != EOK )
 			{
-				free( node );
+				delete node;
 				return ( false );
 			}
 
@@ -458,7 +458,7 @@ bool loadaperreply( std::istream *f )
 			}
 			else
 			{
-				free( node );
+				delete node;
 
 				if ( ! aperdb[ address ]->isnewer( date ) )
 					aperdb[ address ]->date( date );
@@ -500,7 +500,7 @@ bool setapercleared( std::istream *f )
 
 		if ( err != EOK )
 		{
-			free( node );
+			delete node;
 			return ( false );
 		}
 
@@ -509,7 +509,7 @@ bool setapercleared( std::istream *f )
 
 		if ( aperdb.count( address ) > 0 )
 		{
-			free( node );
+			delete node;
 
 			if ( ! aperdb[ address ]->isnewer( date ) )
 			{
@@ -565,7 +565,7 @@ bool loadapercleared( std::istream * f )
 
 			if ( err != EOK )
 			{
-				free( node );
+				delete node;
 				return ( false );
 			}
 
@@ -578,7 +578,7 @@ bool loadapercleared( std::istream * f )
 			}
 			else
 			{
-				free( node );
+				delete node;
 
 				if ( ! aperdb[ address ]->isnewer( date ) )
 					aperdb[ address ]->date( date );
@@ -623,7 +623,7 @@ bool loadaperlinks( std::istream *f )
 
 			if ( err != EOK )
 			{
-				free( node );
+				delete node;
 				return ( false );
 			}
 
@@ -636,7 +636,7 @@ bool loadaperlinks( std::istream *f )
 			}
 			else
 			{
-				free( node );
+				delete node;
 
 				if ( ! aperdb[ address ]->isnewer( date ) )
 					aperdb[ address ]->date( date );
@@ -706,7 +706,7 @@ bool loaduserreply( std::istream *f )
 
 		if ( err != EOK )
 		{
-			free( node );
+			delete node;
 			return ( false );
 		}
 
@@ -730,7 +730,7 @@ bool loaduserreply( std::istream *f )
 
 			if ( p->addrtype() != addrt ) p->addrtype( addrt );
 
-			free( node );
+			delete node;
 		}
 	}
 
@@ -763,7 +763,7 @@ bool loaduserlinks( std::istream *f )
 
 		if ( err != EOK )
 		{
-			free( node );
+			delete node;
 			return ( false );
 		}
 
@@ -776,7 +776,7 @@ bool loaduserlinks( std::istream *f )
 		}
 		else
 		{
-			free( node );
+			delete node;
 
 			if ( ! aperdb[ address ]->isnewer( date ) )
 				aperdb[ address ]->date( date );
@@ -815,7 +815,7 @@ bool loadusercleared( std::istream *f )
 
 		if ( err != EOK )
 		{
-			free( node );
+			delete node;
 			return ( false );
 		}
 
@@ -828,7 +828,7 @@ bool loadusercleared( std::istream *f )
 		}
 		else
 		{
-			free( node );
+			delete node;
 
 			if ( ! aperdb[ address ]->isnewer( date ) )
 				aperdb[ address ]->date( date );
