@@ -1,13 +1,17 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.14 2010/04/14 22:24:25 shollatz Exp $
+$Id: aper.cc,v 1.15 2010/04/21 17:07:06 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
 
 NOTES
 
-[a] Use:  aper list [file]
+[a] Use:
+		aper list file
+		aper list < file
+		aper list
+
 	where 'list' is one of the following:
 
 		reply	-- add to phish reply list
@@ -15,115 +19,27 @@ NOTES
 		links	-- add to phish links list
 		help	-- simple command usage
 
-	Reads from stdin if file isn't given.
+	Reads from stdin if file isn't given.  In the third use above, stdin
+	is read until end-of-file is entered at the keyboard, usually 'ctrl-D'.
+
+	Sometimes this is useful: echo | aper list
+
 	The file format follows the "standard" APER form, one entry per line.
+	The file must have the same type of contents as the specified list.
 
-[b] Inspired by 'add-address-to-list.pl' by Jesse Thompson.
+[b] Compile: c++ -s -o aper aper.cc
 
-[c] Compile: c++ -s -o aper aper.cc
+[c] Warranty
 
-	This compiles "aper.cc" to the executable "aper".
-	Of course, you can name the executable whatever you like.
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version 2
+	of the License, or (at your option) any later version.
 
-	Builds OK with GNU C++ compiler on Solaris and Debian platforms.
-	Not tested build with other compilers or platforms.
-
-	Ideally, this should be complied into separate modules then linked.
-
-[d] Kludgeware reigned over cleverness.  The next version will be a refactor.
-
-	Many of the functions in aper seem to have duplicate code taken
-	from other (similar) functions.  This is semi-deliberate, just in
-	case semantics change, then we can thwart brittle dependencies. :-)
-	(OK, I'm lazy, but I work hard at it.)
-
-[e] BASIC USE
-
-	aper adds bulk data to the "phishing_reply_addresses",
-	"phishing_links", and "phishing_cleared_addresses" lists. These
-	will be called the APER files.
-
-	aper is used in the current working directory.	This means you can
-	copy APER files to some directory then run aper in that directory
-	without affecting the original, if desired.
-
-	aper needs two sources of data: the APER files and from the user.
-	The user files can be empty.
-
-	aper does not subtract from the APER or user files unless there
-	are duplicate entries.
-
-	aper operates on APER files based on a command line argument.
-	Generically, aper is run one of two ways:
-
-		aper list_type userdata
-		aper list_type < userdata
-
-	where list_type is:
-
-		'reply' to add to phishing_reply_addresses
-		'links' to add to phishing_links
-		'cleared' to add to phishing_cleared_addresses
-
-	and userdata is a file (or stdin) containing the same kind of data
-	specified by list_type .
-
-	Data is added to the list in a simple way.  If the entry doesn't
-	exist, add it.	If its date is newer than the one in the list,
-	update the date.  In the case of the phishing_reply_addresses list,
-	the address type is merged with existing ones, even if the entry
-	date in the userdata is older than the APER entry.
-
-	There is some simple data validation.
-
-	For all lists, valid dates are of the form YYYYMMDD and its
-	components must resolve to a valid date using mktime().  That means
-	valid dates are somewhere between 13 Dec 1901 and 19 Jan 2038.
-
-	Each list type has it's own sense of a valid address.
-
-	For the phishing_reply_addresses and phishing_cleared_addresses
-	lists, a valid address must look like an email address; basically,
-	'something@more.here'.	The address cannot have a trailing '.' and
-	the host portion must begin with an alphanumeric, per RFCs.
-
-	For the phishing_links lists, a valid address must look like a
-	hostname; basically, 'some.thing.more'.  The same simple RFC check
-	is done as in the above.  Further, the address cannot begin with
-	'http:' or 'https:'.
-
-	In all address checks a simple typo check is done to catch '..'.
-
-	aper will exit with a nonzero status and a diagnostic upon data
-	validation problems and not affect the APER files.  New APER files
-	are written only when there are no validation or other errors.
-
-	Sometimes this is useful:
-
-		echo | aper list_type
-
-	This does data validation on the APER list then writes it if
-	all goes well, including removing duplicate entries or merging
-	address info if the entries we made manually.
-
-	Big Question:  How are entries removed from a list?
-
-	Answer:  Your favorite text editor, except for the
-	phishing_reply_addresses list since entries can be removed
-	by adding to the phishing_cleared_addresses list though the
-	editor approach works, too.
-
-[f] Warranty and things beyond anyone's control or vision....
-
-### This program is free software; you can redistribute it and/or
-### modify it under the terms of the GNU General Public License
-### as published by the Free Software Foundation; either version 2
-### of the License, or (at your option) any later version.
-###
-### This program is distributed in the hope that it will be useful,
-### but WITHOUT ANY WARRANTY; without even the implied warranty of
-### MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-### GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
 */
@@ -142,13 +58,22 @@ Copyright (C) 2010 University of Minnesota.  All rights reserved.
 #include <time.h>
 #include <cstdio>
 
+//=================================================================
+// TWEEKABLES
+// in case file names and address types change. probably no need to
+// change things beyond this point unless you're fixing things.
+
 const std::string replyfile			= "phishing_reply_addresses";
+const std::string replytypes		= "ABCDE";
 const std::string replyclearedfile	= "phishing_cleared_addresses";
 const std::string linksfile			= "phishing_links";
+//=================================================================
 
 const char tokcomment = '#';
 const char tokcsv = ',';
 const char toksplit = ' ';
+const char tokmail = '@';
+const char tokdns = '.';
 
 const char *tmpdir = ".";	// dir for temp files, should be current working dir
 const char *tmpprefix = ".aper";  // prefix for temp files (5 char max)
@@ -415,7 +340,6 @@ bool loadaperdb( void )
 bool loadaperreply( std::istream *f )
 {
 	std::string s;
-	bool skipcomment = false;
 
 	while ( getline( *f, s ) )
 	{
@@ -423,20 +347,27 @@ bool loadaperreply( std::istream *f )
 		if ( s.empty() ) continue;
 
 		if ( s[0] == tokcomment )
-		{
-			if ( ! skipcomment ) comments.push_back( s );
-		}
+			comments.push_back( s );
 		else
+			break;
+	}
+
+	if ( f->good() )
+	{
+		do
 		{
+			if ( s[0] == tokcomment ) continue;
+
+			s = trimspace( s, ENDS );
+			if ( s.empty() ) continue;
 			s = tolowercase( s );
-			skipcomment = true;
-			errstate err = EOK;
+			errstate err( EOK );
 			std::string address, addrt, date;
 
 			std::istringstream iss( split( s ) );
-			iss >> address >> addrt >> date;
+				iss >> address >> addrt >> date;
 
-			APERreply *node = new APERreply();
+			APERreply *node = new APERreply;
 
 			if ( ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address );
 			if ( ! node->isvalidaddrtype( addrt ) ) err = errnotify( EATYPE, addrt );
@@ -459,7 +390,7 @@ bool loadaperreply( std::istream *f )
 			else
 			{
 				delete node;
-
+	
 				if ( ! aperdb[ address ]->isnewer( date ) )
 					aperdb[ address ]->date( date );
 
@@ -467,6 +398,7 @@ bool loadaperreply( std::istream *f )
 				if ( p->addrtype() != addrt ) p->addrtype( addrt );
 			}
 		}
+		while ( getline( *f, s ) );
 	}
 
 	return ( true );
@@ -492,9 +424,9 @@ bool setapercleared( std::istream *f )
 		std::istringstream iss( split( s ) );
 		iss >> address >> date;
 
-		APERreply *node = new APERreply();
+		APERreply *node = new APERreply;
 		
-		errstate err = EOK;
+		errstate err( EOK );
 		if ( ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address );
 		if ( ! node->isvaliddate( date ) ) err = errnotify( EDATE, date );
 
@@ -534,10 +466,9 @@ bool setapercleared( std::istream *f )
 // this is similar loadaperlinks().  we can use a function template here
 // but that would break things if the cleared and links file sematics change.
 
-bool loadapercleared( std::istream * f )
+bool loadapercleared( std::istream *f )
 {
 	std::string s;
-	bool skipcomment = false;
 
 	while ( getline( *f, s ) )
 	{
@@ -545,14 +476,21 @@ bool loadapercleared( std::istream * f )
 		if ( s.empty() ) continue;
 
 		if ( s[0] == tokcomment )
-		{
-			if ( ! skipcomment ) comments.push_back( s );
-		}
+			comments.push_back( s );
 		else
+			break;
+	}
+
+	if ( f->good() )
+	{
+		do
 		{
+			if ( s[0] == tokcomment ) continue;
+
+			s = trimspace( s, ENDS );
+			if ( s.empty() ) continue;
 			s = tolowercase( s );
-			skipcomment = true;
-			errstate err = EOK;
+			errstate err( EOK );
 			std::string address, date;
 
 			std::istringstream iss( split( s ) );
@@ -584,6 +522,7 @@ bool loadapercleared( std::istream * f )
 					aperdb[ address ]->date( date );
 			}
 		}
+		while ( getline( *f, s ) );
 	}
 
 	return ( true );
@@ -596,7 +535,6 @@ bool loadapercleared( std::istream * f )
 bool loadaperlinks( std::istream *f )
 {
 	std::string s;
-	bool skipcomment = false;
 
 	while ( getline( *f, s ) )
 	{
@@ -604,13 +542,20 @@ bool loadaperlinks( std::istream *f )
 		if ( s.empty() ) continue;
 
 		if ( s[0] == tokcomment )
-		{
-			if ( ! skipcomment ) comments.push_back( s );
-		}
+			comments.push_back( s );
 		else
+			break;
+	}
+
+	if ( f->good() )
+	{
+		do
 		{
-			skipcomment = true;
-			errstate err = EOK;
+			if ( s[0] == tokcomment ) continue;
+
+			s = trimspace( s, ENDS );
+			if ( s.empty() ) continue;
+			errstate err( EOK );
 			std::string address, date;
 
 			std::istringstream iss( split( s ) );
@@ -642,6 +587,7 @@ bool loadaperlinks( std::istream *f )
 					aperdb[ address ]->date( date );
 			}
 		}
+		while ( getline( *f, s ) );
 	}
 
 	return ( true );
@@ -692,13 +638,13 @@ bool loaduserreply( std::istream *f )
 		if ( s.empty() ) continue;
 		if ( s[0] == tokcomment ) continue;
 			
-		errstate err = EOK;
+		errstate err( EOK );
 		std::string address, addrt, date;
 		
 		std::istringstream iss( split( s ) );
 		iss >> address >> addrt >> date;
 
-		APERreply *node = new APERreply();
+		APERreply *node = new APERreply;
 
 		if ( ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address );
 		if ( ! node->isvalidaddrtype( addrt ) ) err = errnotify( EATYPE, addrt );
@@ -750,7 +696,7 @@ bool loaduserlinks( std::istream *f )
 		if ( s.empty() ) continue;
 		if ( s[0] == tokcomment ) continue;
 
-		errstate err = EOK;
+		errstate err( EOK );
 		std::string address, date;
 
 		std::istringstream iss( split( s ) );
@@ -802,7 +748,7 @@ bool loadusercleared( std::istream *f )
 		if ( s.empty() ) continue;
 		if ( s[0] == tokcomment ) continue;
 
-		errstate err = EOK;
+		errstate err( EOK );
 		std::string address, date;
 
 		std::istringstream iss( split( s ) );
@@ -899,18 +845,18 @@ bool APERnode::isvaliddate( std::string date ) const
 	if ( date.empty() ) return ( false );
 	if ( date.size() != 8 ) return ( false );
 
-	std::string Y = date.substr( 0, 4 );
-	std::string M = date.substr( 4, 2 );
-	std::string D = date.substr( 6, 2 );
+	std::string Y( date.substr( 0, 4 ) );
+	std::string M( date.substr( 4, 2 ) );
+	std::string D( date.substr( 6, 2 ) );
 
 	std::string digits = "0123456789";
 	if ( Y.find_first_not_of( digits ) != std::string::npos ) return ( false );
 	if ( M.find_first_not_of( digits ) != std::string::npos ) return ( false );
 	if ( D.find_first_not_of( digits ) != std::string::npos ) return ( false );
 
-	int y = atoi( Y.c_str() );
-	int m = atoi( M.c_str() );
-	int d = atoi( D.c_str() );
+	int y( atoi( Y.c_str() ) );
+	int m( atoi( M.c_str() ) );
+	int d( atoi( D.c_str() ) );
 
 	if ( y * m * d == 0 ) return ( false );
 
@@ -967,9 +913,6 @@ void APERreply::write( std::ostream &f )
 bool APERreply::isvalidaddress( std::string address ) const
 {
 	if ( address.empty() ) return ( false );
-
-	const char tokmail = '@';
-	const char tokdns = '.';
 
 	std::string::size_type d = address.find( tokmail );
 
@@ -1037,9 +980,9 @@ bool APERreply::isvalidaddrtype( std::string addrt ) const
 {
 	if ( addrt.empty() ) return ( false );
 
-	std::string t = "ABCDEabcde";
+	std::transform( addrt.begin(), addrt.end(), addrt.begin(), toupper );
 
-	return ( !( addrt.find_first_not_of( t ) != std::string::npos) );
+	return ( !( addrt.find_first_not_of( replytypes ) != std::string::npos) );
 }
 
 /////////////////////////////////////////////////////
@@ -1074,8 +1017,6 @@ bool APERlinks::isvalidaddress( std::string address ) const
 
 // RFC1123 and RFC952 specify host names start with a letter or digit.
 	if ( ! isalnum( address[0] ) ) return ( false );
-
-	const char tokdns = '.';
 
 	std::string::size_type d = address.find( tokdns );
 	if ( d == std::string::npos ) return ( false );
@@ -1187,16 +1128,7 @@ std::string trimspace( std::string s, trimspec trim )
 std::string split( std::string s, char c )
 {
 	s = trimspace( s, ALL );
-
-	std::string::iterator itr = s.begin();
-	std::string::iterator itrE = s.end();
-
-	while ( itr != itrE )
-	{
-		if ( *itr == c ) *itr = toksplit;
-		++itr;
-	}
-
+	std::replace( s.begin(), s.end(), c, toksplit );
 	return ( s );
 }
 
