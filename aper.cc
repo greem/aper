@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.15 2010/04/21 17:07:06 shollatz Exp $
+$Id: aper.cc,v 1.16 2010/04/26 23:17:13 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -935,7 +935,13 @@ bool APERreply::isvalidaddress( std::string address ) const
 		{
 // if we got this far then there is something after tokmail
 // RFC1123 and RFC952 specify host names start with a letter or digit.
-			if ( ! isalnum( host.at( 1 ) ) ) return ( false );
+			if ( ! isalnum( host.at( 1 ) ) )
+			{
+				// some hosts begin with '-'?
+				std::string::size_type p = host.find_first_of( "-" );
+				if ( p != 1 )
+					return ( false );
+			}
 
 			if ( host.at( host.size() - 1 ) != tokdns ) return ( true );
 		}
@@ -1016,7 +1022,13 @@ bool APERlinks::isvalidaddress( std::string address ) const
 	if ( address.find( "https:" ) == 0 ) return ( false );
 
 // RFC1123 and RFC952 specify host names start with a letter or digit.
-	if ( ! isalnum( address[0] ) ) return ( false );
+	if ( ! isalnum( address[0] ) )
+	{
+		// some hosts begin with '-'?
+		std::string::size_type p = address.find_first_of( "-" );
+		if ( p != 0 )
+			return ( false );
+	}
 
 	std::string::size_type d = address.find( tokdns );
 	if ( d == std::string::npos ) return ( false );
