@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.17 2010/04/27 16:24:02 shollatz Exp $
+$Id: aper.cc,v 1.18 2010/04/27 17:21:25 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -195,7 +195,7 @@ typedef unsigned int linenum_type;
 std::string trimspace( std::string s, trimspec trim = ENDS );
 std::string split( std::string s, char c = tokcsv );
 std::string tolowercase( std::string s );
-errstate errnotify( errstate err, std::string extrainfo = "", linenum_type = 0 );
+errstate errnotify( errstate err, std::string extrainfo = "", linenum_type line = 0 );
 
 bool loadaperdb( void );
 bool loadaperreply( std::istream *f );
@@ -385,7 +385,8 @@ bool loadaperreply( std::istream *f )
 				return ( false );
 			}
 
-			node->address( tolowercase( address ) );
+			address = tolowercase( address );
+			node->address( address );
 			node->addrtype( addrt );
 			node->date( date );
 
@@ -444,7 +445,8 @@ bool setapercleared( std::istream *f )
 			return ( false );
 		}
 
-		node->address( tolowercase( address ) );
+		address = tolowercase( address );
+		node->address( address );
 		node->date( date );
 
 		if ( aperdb.count( address ) > 0 )
@@ -517,7 +519,8 @@ bool loadapercleared( std::istream *f )
 				return ( false );
 			}
 
-			node->address( tolowercase( address ) );
+			address = tolowercase( address );
+			node->address( address );
 			node->date( date );
 
 			if ( aperdb.count( address ) == 0 )
@@ -671,7 +674,8 @@ bool loaduserreply( std::istream *f )
 			return ( false );
 		}
 
-		node->address( tolowercase( address ) );
+		address = tolowercase( address );
+		node->address( address );
 		node->addrtype( addrt );
 		node->date( date );
 
@@ -784,7 +788,8 @@ bool loadusercleared( std::istream *f )
 			return ( false );
 		}
 
-		node->address( tolowercase( address ) );
+		address = tolowercase( address );
+		node->address( address );
 		node->date( date );
 
 		if ( aperdb.count( address ) == 0 )
