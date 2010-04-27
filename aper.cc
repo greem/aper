@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.16 2010/04/26 23:17:13 shollatz Exp $
+$Id: aper.cc,v 1.17 2010/04/27 16:24:02 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -190,11 +190,12 @@ private:
 
 typedef std::map<std::string, APERnode *> APERdb;
 typedef std::vector<std::string> Comments;
+typedef unsigned int linenum_type;
 
 std::string trimspace( std::string s, trimspec trim = ENDS );
 std::string split( std::string s, char c = tokcsv );
 std::string tolowercase( std::string s );
-errstate errnotify( errstate err, std::string extrainfo = "" );
+errstate errnotify( errstate err, std::string extrainfo = "", linenum_type = 0 );
 
 bool loadaperdb( void );
 bool loadaperreply( std::istream *f );
@@ -251,7 +252,7 @@ int main( int argc, char *argv[] )
 //      errnotify                                  //
 /////////////////////////////////////////////////////
 
-errstate errnotify( errstate err, std::string extrainfo )
+errstate errnotify( errstate err, std::string extrainfo, linenum_type line )
 {
 	std::string msg;
 
@@ -281,6 +282,9 @@ errstate errnotify( errstate err, std::string extrainfo )
 
 	if ( ! extrainfo.empty() )
 		msg += ": " + extrainfo;
+
+	if ( line > 0 )
+		std::cerr << "Line " << line << ": ";
 
 	std::cerr << msg << std::endl;
 
@@ -340,9 +344,11 @@ bool loadaperdb( void )
 bool loadaperreply( std::istream *f )
 {
 	std::string s;
+	linenum_type line = 0;
 
 	while ( getline( *f, s ) )
 	{
+		++line;
 		s = trimspace( s, ENDS );
 		if ( s.empty() ) continue;
 
@@ -360,8 +366,7 @@ bool loadaperreply( std::istream *f )
 
 			s = trimspace( s, ENDS );
 			if ( s.empty() ) continue;
-			s = tolowercase( s );
-			errstate err( EOK );
+
 			std::string address, addrt, date;
 
 			std::istringstream iss( split( s ) );
@@ -369,9 +374,10 @@ bool loadaperreply( std::istream *f )
 
 			APERreply *node = new APERreply;
 
-			if ( ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address );
-			if ( ! node->isvalidaddrtype( addrt ) ) err = errnotify( EATYPE, addrt );
-			if ( ! node->isvaliddate( date ) ) err = errnotify( EDATE, date );
+			errstate err = EOK;
+			if ( err == EOK && ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address, line );
+			if ( err == EOK && ! node->isvalidaddrtype( addrt ) ) err = errnotify( EATYPE, addrt, line );
+			if ( err == EOK && ! node->isvaliddate( date ) ) err = errnotify( EDATE, date, line );
 
 			if ( err != EOK )
 			{
@@ -379,7 +385,7 @@ bool loadaperreply( std::istream *f )
 				return ( false );
 			}
 
-			node->address( address );
+			node->address( tolowercase( address ) );
 			node->addrtype( addrt );
 			node->date( date );
 
@@ -398,7 +404,7 @@ bool loadaperreply( std::istream *f )
 				if ( p->addrtype() != addrt ) p->addrtype( addrt );
 			}
 		}
-		while ( getline( *f, s ) );
+		while ( ++line, getline( *f, s ) );
 	}
 
 	return ( true );
@@ -413,10 +419,12 @@ bool loadaperreply( std::istream *f )
 bool setapercleared( std::istream *f )
 {
 	std::string s;
+	linenum_type line = 0;
 
 	while ( getline( *f, s ) )
 	{
-		s = tolowercase( trimspace( s, ENDS ) );
+		++line;
+		s = trimspace( s, ENDS );
 		if ( s.empty() ) continue;
 		if ( s[0] == tokcomment ) continue;
 
@@ -426,9 +434,9 @@ bool setapercleared( std::istream *f )
 
 		APERreply *node = new APERreply;
 		
-		errstate err( EOK );
-		if ( ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address );
-		if ( ! node->isvaliddate( date ) ) err = errnotify( EDATE, date );
+		errstate err = EOK;
+		if ( err == EOK && ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address, line );
+		if ( err == EOK && ! node->isvaliddate( date ) ) err = errnotify( EDATE, date, line );
 
 		if ( err != EOK )
 		{
@@ -436,7 +444,7 @@ bool setapercleared( std::istream *f )
 			return ( false );
 		}
 
-		node->address( address );
+		node->address( tolowercase( address ) );
 		node->date( date );
 
 		if ( aperdb.count( address ) > 0 )
@@ -469,9 +477,11 @@ bool setapercleared( std::istream *f )
 bool loadapercleared( std::istream *f )
 {
 	std::string s;
+	linenum_type line = 0;
 
 	while ( getline( *f, s ) )
 	{
+		++line;
 		s = trimspace( s, ENDS );
 		if ( s.empty() ) continue;
 
@@ -489,8 +499,7 @@ bool loadapercleared( std::istream *f )
 
 			s = trimspace( s, ENDS );
 			if ( s.empty() ) continue;
-			s = tolowercase( s );
-			errstate err( EOK );
+
 			std::string address, date;
 
 			std::istringstream iss( split( s ) );
@@ -498,8 +507,9 @@ bool loadapercleared( std::istream *f )
 
 			APERcleared *node = new APERcleared;
 
-			if ( ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address );
-			if ( ! node->isvaliddate( date ) ) err = errnotify( EDATE, date );
+			errstate err = EOK;
+			if ( err == EOK && ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address, line );
+			if ( err == EOK && ! node->isvaliddate( date ) ) err = errnotify( EDATE, date, line );
 
 			if ( err != EOK )
 			{
@@ -507,7 +517,7 @@ bool loadapercleared( std::istream *f )
 				return ( false );
 			}
 
-			node->address( address );
+			node->address( tolowercase( address ) );
 			node->date( date );
 
 			if ( aperdb.count( address ) == 0 )
@@ -522,7 +532,7 @@ bool loadapercleared( std::istream *f )
 					aperdb[ address ]->date( date );
 			}
 		}
-		while ( getline( *f, s ) );
+		while ( ++line, getline( *f, s ) );
 	}
 
 	return ( true );
@@ -535,9 +545,11 @@ bool loadapercleared( std::istream *f )
 bool loadaperlinks( std::istream *f )
 {
 	std::string s;
+	linenum_type line = 0;
 
 	while ( getline( *f, s ) )
 	{
+		++line;
 		s = trimspace( s, ENDS );
 		if ( s.empty() ) continue;
 
@@ -555,7 +567,7 @@ bool loadaperlinks( std::istream *f )
 
 			s = trimspace( s, ENDS );
 			if ( s.empty() ) continue;
-			errstate err( EOK );
+
 			std::string address, date;
 
 			std::istringstream iss( split( s ) );
@@ -563,8 +575,9 @@ bool loadaperlinks( std::istream *f )
 
 			APERlinks *node = new APERlinks;
 
-			if ( ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address );
-			if ( ! node->isvaliddate( date ) ) err = errnotify( EDATE, date );
+			errstate err = EOK;
+			if ( err == EOK && ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address, line );
+			if ( err == EOK && ! node->isvaliddate( date ) ) err = errnotify( EDATE, date, line );
 
 			if ( err != EOK )
 			{
@@ -587,7 +600,7 @@ bool loadaperlinks( std::istream *f )
 					aperdb[ address ]->date( date );
 			}
 		}
-		while ( getline( *f, s ) );
+		while ( ++line, getline( *f, s ) );
 	}
 
 	return ( true );
@@ -631,14 +644,15 @@ bool loaduserdb( std::string datafile )
 bool loaduserreply( std::istream *f )
 {
 	std::string s;
+	linenum_type line = 0;
 
 	while ( getline( *f , s ) )
 	{
-		s = tolowercase( trimspace( s, ALL ) );
+		++line;
+		s = trimspace( s, ALL );
 		if ( s.empty() ) continue;
 		if ( s[0] == tokcomment ) continue;
 			
-		errstate err( EOK );
 		std::string address, addrt, date;
 		
 		std::istringstream iss( split( s ) );
@@ -646,9 +660,10 @@ bool loaduserreply( std::istream *f )
 
 		APERreply *node = new APERreply;
 
-		if ( ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address );
-		if ( ! node->isvalidaddrtype( addrt ) ) err = errnotify( EATYPE, addrt );
-		if ( ! node->isvaliddate( date ) ) err = errnotify( EDATE, date );
+		errstate err = EOK;
+		if ( err == EOK && ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address, line );
+		if ( err == EOK && ! node->isvalidaddrtype( addrt ) ) err = errnotify( EATYPE, addrt, line );
+		if ( err == EOK && ! node->isvaliddate( date ) ) err = errnotify( EDATE, date, line );
 
 		if ( err != EOK )
 		{
@@ -656,7 +671,7 @@ bool loaduserreply( std::istream *f )
 			return ( false );
 		}
 
-		node->address( address );
+		node->address( tolowercase( address ) );
 		node->addrtype( addrt );
 		node->date( date );
 
@@ -690,13 +705,14 @@ bool loaduserreply( std::istream *f )
 bool loaduserlinks( std::istream *f )
 {
 	std::string s;
+	linenum_type line = 0;
 
 	while ( getline( *f, s ) )
 	{
+		++line;
 		if ( s.empty() ) continue;
 		if ( s[0] == tokcomment ) continue;
 
-		errstate err( EOK );
 		std::string address, date;
 
 		std::istringstream iss( split( s ) );
@@ -704,8 +720,9 @@ bool loaduserlinks( std::istream *f )
 
 		APERlinks *node = new APERlinks;
 
-		if ( ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address );
-		if ( ! node->isvaliddate( date ) ) err = errnotify( EDATE, date );
+		errstate err = EOK;
+		if ( err == EOK && ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address, line );
+		if ( err == EOK && ! node->isvaliddate( date ) ) err = errnotify( EDATE, date, line );
 
 		if ( err != EOK )
 		{
@@ -741,14 +758,15 @@ bool loaduserlinks( std::istream *f )
 bool loadusercleared( std::istream *f )
 {
 	std::string s;
+	linenum_type line = 0;
 
 	while ( getline( *f, s ) )
 	{
-		s = tolowercase( trimspace( s, ENDS ) );
+		++line;
+		s = trimspace( s, ENDS );
 		if ( s.empty() ) continue;
 		if ( s[0] == tokcomment ) continue;
 
-		errstate err( EOK );
 		std::string address, date;
 
 		std::istringstream iss( split( s ) );
@@ -756,8 +774,9 @@ bool loadusercleared( std::istream *f )
 
 		APERcleared *node = new APERcleared;
 
-		if ( ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address );
-		if ( ! node->isvaliddate( date ) ) err = errnotify( EDATE, date );
+		errstate err = EOK;
+		if ( err == EOK && ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address, line );
+		if ( err == EOK && ! node->isvaliddate( date ) ) err = errnotify( EDATE, date, line );
 
 		if ( err != EOK )
 		{
@@ -765,7 +784,7 @@ bool loadusercleared( std::istream *f )
 			return ( false );
 		}
 
-		node->address( address );
+		node->address( tolowercase( address ) );
 		node->date( date );
 
 		if ( aperdb.count( address ) == 0 )
@@ -937,10 +956,9 @@ bool APERreply::isvalidaddress( std::string address ) const
 // RFC1123 and RFC952 specify host names start with a letter or digit.
 			if ( ! isalnum( host.at( 1 ) ) )
 			{
-				// some hosts begin with '-'?
+				// some hosts begin with other symbols
 				std::string::size_type p = host.find_first_of( "-" );
-				if ( p != 1 )
-					return ( false );
+				if ( p != 1 ) return ( false );
 			}
 
 			if ( host.at( host.size() - 1 ) != tokdns ) return ( true );
@@ -1024,10 +1042,9 @@ bool APERlinks::isvalidaddress( std::string address ) const
 // RFC1123 and RFC952 specify host names start with a letter or digit.
 	if ( ! isalnum( address[0] ) )
 	{
-		// some hosts begin with '-'?
+		// some hosts begin with other symbols
 		std::string::size_type p = address.find_first_of( "-" );
-		if ( p != 0 )
-			return ( false );
+		if ( p != 0 ) return ( false );
 	}
 
 	std::string::size_type d = address.find( tokdns );
