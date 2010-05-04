@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.18 2010/04/27 17:21:25 shollatz Exp $
+$Id: aper.cc,v 1.19 2010/05/04 22:25:48 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -74,8 +74,9 @@ const char tokcsv = ',';
 const char toksplit = ' ';
 const char tokmail = '@';
 const char tokdns = '.';
+const char tokurl = '/';
 
-const char *tmpdir = ".";	// dir for temp files, should be current working dir
+const char *tmpdir = ".";	// dir for temp files
 const char *tmpprefix = ".aper";  // prefix for temp files (5 char max)
 
 enum errstate
@@ -195,6 +196,7 @@ typedef unsigned int linenum_type;
 std::string trimspace( std::string s, trimspec trim = ENDS );
 std::string split( std::string s, char c = tokcsv );
 std::string tolowercase( std::string s );
+std::string urlcleanup( std::string url );
 errstate errnotify( errstate err, std::string extrainfo = "", linenum_type line = 0 );
 
 bool loadaperdb( void );
@@ -375,9 +377,12 @@ bool loadaperreply( std::istream *f )
 			APERreply *node = new APERreply;
 
 			errstate err = EOK;
-			if ( err == EOK && ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address, line );
-			if ( err == EOK && ! node->isvalidaddrtype( addrt ) ) err = errnotify( EATYPE, addrt, line );
-			if ( err == EOK && ! node->isvaliddate( date ) ) err = errnotify( EDATE, date, line );
+			if ( err == EOK && ! node->isvalidaddress( address ) )
+				err = errnotify( EADDRESS, address, line );
+			if ( err == EOK && ! node->isvalidaddrtype( addrt ) )
+				err = errnotify( EATYPE, addrt, line );
+			if ( err == EOK && ! node->isvaliddate( date ) )
+				err = errnotify( EDATE, date, line );
 
 			if ( err != EOK )
 			{
@@ -436,8 +441,10 @@ bool setapercleared( std::istream *f )
 		APERreply *node = new APERreply;
 		
 		errstate err = EOK;
-		if ( err == EOK && ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address, line );
-		if ( err == EOK && ! node->isvaliddate( date ) ) err = errnotify( EDATE, date, line );
+		if ( err == EOK && ! node->isvalidaddress( address ) )
+			err = errnotify( EADDRESS, address, line );
+		if ( err == EOK && ! node->isvaliddate( date ) )
+			err = errnotify( EDATE, date, line );
 
 		if ( err != EOK )
 		{
@@ -473,8 +480,6 @@ bool setapercleared( std::istream *f )
 /////////////////////////////////////////////////////
 //      loadapercleared                            //
 /////////////////////////////////////////////////////
-// this is similar loadaperlinks().  we can use a function template here
-// but that would break things if the cleared and links file sematics change.
 
 bool loadapercleared( std::istream *f )
 {
@@ -510,8 +515,10 @@ bool loadapercleared( std::istream *f )
 			APERcleared *node = new APERcleared;
 
 			errstate err = EOK;
-			if ( err == EOK && ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address, line );
-			if ( err == EOK && ! node->isvaliddate( date ) ) err = errnotify( EDATE, date, line );
+			if ( err == EOK && ! node->isvalidaddress( address ) )
+				err = errnotify( EADDRESS, address, line );
+			if ( err == EOK && ! node->isvaliddate( date ) )
+				err = errnotify( EDATE, date, line );
 
 			if ( err != EOK )
 			{
@@ -577,10 +584,13 @@ bool loadaperlinks( std::istream *f )
 			iss >> address >> date;
 
 			APERlinks *node = new APERlinks;
+			address = urlcleanup( address );
 
 			errstate err = EOK;
-			if ( err == EOK && ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address, line );
-			if ( err == EOK && ! node->isvaliddate( date ) ) err = errnotify( EDATE, date, line );
+			if ( err == EOK && ! node->isvalidaddress( address ) )
+				err = errnotify( EADDRESS, address, line );
+			if ( err == EOK && ! node->isvaliddate( date ) )
+				err = errnotify( EDATE, date, line );
 
 			if ( err != EOK )
 			{
@@ -664,9 +674,12 @@ bool loaduserreply( std::istream *f )
 		APERreply *node = new APERreply;
 
 		errstate err = EOK;
-		if ( err == EOK && ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address, line );
-		if ( err == EOK && ! node->isvalidaddrtype( addrt ) ) err = errnotify( EATYPE, addrt, line );
-		if ( err == EOK && ! node->isvaliddate( date ) ) err = errnotify( EDATE, date, line );
+		if ( err == EOK && ! node->isvalidaddress( address ) )
+			err = errnotify( EADDRESS, address, line );
+		if ( err == EOK && ! node->isvalidaddrtype( addrt ) )
+			err = errnotify( EATYPE, addrt, line );
+		if ( err == EOK && ! node->isvaliddate( date ) )
+			err = errnotify( EDATE, date, line );
 
 		if ( err != EOK )
 		{
@@ -723,10 +736,13 @@ bool loaduserlinks( std::istream *f )
 		iss >> address >> date;
 
 		APERlinks *node = new APERlinks;
+		address = urlcleanup( address );
 
 		errstate err = EOK;
-		if ( err == EOK && ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address, line );
-		if ( err == EOK && ! node->isvaliddate( date ) ) err = errnotify( EDATE, date, line );
+		if ( err == EOK && ! node->isvalidaddress( address ) )
+			err = errnotify( EADDRESS, address, line );
+		if ( err == EOK && ! node->isvaliddate( date ) )
+			err = errnotify( EDATE, date, line );
 
 		if ( err != EOK )
 		{
@@ -756,8 +772,6 @@ bool loaduserlinks( std::istream *f )
 /////////////////////////////////////////////////////
 //      loadusercleared                            //
 /////////////////////////////////////////////////////
-// this is similar to loaduserlinks().  we can use a function template here
-// but that would break things if the cleared and links file sematics change.
 
 bool loadusercleared( std::istream *f )
 {
@@ -779,8 +793,10 @@ bool loadusercleared( std::istream *f )
 		APERcleared *node = new APERcleared;
 
 		errstate err = EOK;
-		if ( err == EOK && ! node->isvalidaddress( address ) ) err = errnotify( EADDRESS, address, line );
-		if ( err == EOK && ! node->isvaliddate( date ) ) err = errnotify( EDATE, date, line );
+		if ( err == EOK && ! node->isvalidaddress( address ) )
+			err = errnotify( EADDRESS, address, line );
+		if ( err == EOK && ! node->isvaliddate( date ) )
+			err = errnotify( EDATE, date, line );
 
 		if ( err != EOK )
 		{
@@ -1041,9 +1057,6 @@ bool APERlinks::isvalidaddress( std::string address ) const
 {
 	if ( address.empty() ) return ( false );
 
-	if ( address.find( "http:" ) == 0 ) return ( false );
-	if ( address.find( "https:" ) == 0 ) return ( false );
-
 // RFC1123 and RFC952 specify host names start with a letter or digit.
 	if ( ! isalnum( address[0] ) )
 	{
@@ -1174,4 +1187,46 @@ std::string tolowercase( std::string s )
 {
 	std::transform( s.begin(), s.end(), s.begin(), tolower );
 	return ( s );
+}
+
+/////////////////////////////////////////////////////
+//      urlcleanup                                 //
+/////////////////////////////////////////////////////
+// transform url to something sane. doesn't do much right now...
+
+std::string urlcleanup( std::string url )
+{
+	if ( url.empty() ) return ( url );
+
+// remove protocol
+
+	std::string protocol;
+
+	protocol = "http://";
+	if ( url.find( protocol ) == 0 ) url.erase( 0, protocol.size() );
+	protocol = "https://";
+	if ( url.find( protocol ) == 0 ) url.erase( 0, protocol.size() );
+
+	std::string::size_type p;
+
+// make host part lowercase
+
+	p= url.find( tokurl );
+
+	if ( p != std::string::npos )
+	{
+		for ( std::string::size_type q = 0; q < p; ++q )
+			url[ q ] = tolower( url[ q ] );
+	}
+	else
+		url = tolowercase( url );
+
+// remove trailing slash
+
+	std::string::reverse_iterator ritr = url.rbegin();
+
+	if ( *ritr == tokurl )
+		url.resize( url.find_last_of( *ritr ) );
+
+	return ( url );
 }
