@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.19 2010/05/04 22:25:48 shollatz Exp $
+$Id: aper.cc,v 1.20 2010/05/07 22:39:24 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -74,7 +74,6 @@ const char tokcsv = ',';
 const char toksplit = ' ';
 const char tokmail = '@';
 const char tokdns = '.';
-const char tokurl = '/';
 
 const char *tmpdir = ".";	// dir for temp files
 const char *tmpprefix = ".aper";  // prefix for temp files (5 char max)
@@ -86,7 +85,7 @@ enum errstate
 	EFILE,		// cannot open file of new addresses
 	ERFILE,		// cannot open file of reply addresses
 	ECFILE,		// cannot open file of cleared addresses
-	ELFILE,		// Cannot open file of links
+	ELFILE,		// cannot open file of links
 	EXFILE,		// cannot open temporary file
 	EXFILERM,	// cannot remove temporary file
 	EATYPE,		// incorrect address type
@@ -280,6 +279,9 @@ errstate errnotify( errstate err, std::string extrainfo, linenum_type line )
 		case EUSERDB:	msg = "Cannot load user database"; break;
 		case EWAPERDB:	msg = "Cannot write APER database"; break;
 		case ELFILE:	msg = "Cannot open links file"; break;
+
+		case EUNKNOWN:
+		default:		msg = "Unknown error state"; break;
 	}
 
 	if ( ! extrainfo.empty() )
@@ -1198,20 +1200,24 @@ std::string urlcleanup( std::string url )
 {
 	if ( url.empty() ) return ( url );
 
-// remove protocol
-
-	std::string protocol;
-
-	protocol = "http://";
-	if ( url.find( protocol ) == 0 ) url.erase( 0, protocol.size() );
-	protocol = "https://";
-	if ( url.find( protocol ) == 0 ) url.erase( 0, protocol.size() );
-
 	std::string::size_type p;
 
-// make host part lowercase
+// remove scheme
+// RFC3986 states the scheme can be uppercase but apps should produce
+// lowercase for consistency and documents that present schemes should
+// do so in lowercase.
 
-	p= url.find( tokurl );
+	std::string scheme;
+	std::string hier( "://" );
+
+	p = url.find( hier );
+	if ( p != std::string::npos )
+		url.erase( 0, p + hier.size() );
+
+// make host part ("authority" in RFC lingo) lowercase
+// RFC3986 specifies termination chars.
+
+	p = url.find_first_of( "/?#" );
 
 	if ( p != std::string::npos )
 	{
@@ -1225,7 +1231,7 @@ std::string urlcleanup( std::string url )
 
 	std::string::reverse_iterator ritr = url.rbegin();
 
-	if ( *ritr == tokurl )
+	if ( *ritr == '/' )
 		url.resize( url.find_last_of( *ritr ) );
 
 	return ( url );
