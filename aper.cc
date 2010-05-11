@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.20 2010/05/07 22:39:24 shollatz Exp $
+$Id: aper.cc,v 1.21 2010/05/11 16:32:00 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -1067,6 +1067,10 @@ bool APERlinks::isvalidaddress( std::string address ) const
 		if ( p != 0 ) return ( false );
 	}
 
+// assuming cleanup has already been done, check for embedded URLs.
+// this also catches misbehaved cut-and-pastes. :-)
+	if ( address.find( "://" ) != std::string::npos ) return ( false );
+
 	std::string::size_type d = address.find( tokdns );
 	if ( d == std::string::npos ) return ( false );
 
@@ -1208,11 +1212,20 @@ std::string urlcleanup( std::string url )
 // do so in lowercase.
 
 	std::string scheme;
-	std::string hier( "://" );
+	std::string h( "://" );
 
-	p = url.find( hier );
+	p = url.find( h );
 	if ( p != std::string::npos )
-		url.erase( 0, p + hier.size() );
+	{
+		std::string::size_type q = p + h.size();
+		std::string s = tolowercase( url.substr( 0, q ) );
+
+		// we only nuke ordinary web schemes at the beginning,
+		// not embedded URLs (those found as extra info, etc).
+		// address validators should flag a bad addr if :// is found.
+		if ( s.find( "http" + h ) == 0 || s.find( "https" + h ) == 0 )
+			url.erase( 0, q );
+	}
 
 // make host part ("authority" in RFC lingo) lowercase
 // RFC3986 specifies termination chars.
