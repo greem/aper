@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.21 2010/05/11 16:32:00 shollatz Exp $
+$Id: aper.cc,v 1.22 2010/06/08 19:49:20 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -288,7 +288,7 @@ errstate errnotify( errstate err, std::string extrainfo, linenum_type line )
 		msg += ": " + extrainfo;
 
 	if ( line > 0 )
-		std::cerr << "Line " << line << ": ";
+		std::cerr << "\tline " << line << ": ";
 
 	std::cerr << msg << std::endl;
 
@@ -647,7 +647,10 @@ bool loaduserdb( std::string datafile )
 	if ( dbmode.test( links ) ) status = loaduserlinks( f );
 	if ( dbmode.test( cleared ) ) status = loadusercleared( f );
 
-	if ( *f != std::cin ) ifs.close();
+	if ( *f != std::cin )
+		ifs.close();
+	else
+		f->ignore( std::numeric_limits<int>::max() );
 
 	return ( status );
 }
