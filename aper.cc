@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.22 2010/06/08 19:49:20 shollatz Exp $
+$Id: aper.cc,v 1.23 2010/06/15 14:37:25 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -54,6 +54,7 @@ Copyright (C) 2010 University of Minnesota.  All rights reserved.
 #include <bitset>
 #include <algorithm>
 #include <cctype>
+#include <limits>
 #include <cstdlib>
 #include <time.h>
 #include <cstdio>
