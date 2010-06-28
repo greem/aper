@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.23 2010/06/15 14:37:25 shollatz Exp $
+$Id: aper.cc,v 1.24 2010/06/28 20:55:11 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -1079,7 +1079,8 @@ bool APERlinks::isvalidaddress( std::string address ) const
 	if ( d == std::string::npos ) return ( false );
 
 // try catching a typo...
-	if ( address.find( ".." ) != std::string::npos ) return ( false );
+// FIX: disable this until we can look at the host part separately
+//	if ( address.find( ".." ) != std::string::npos ) return ( false );
 
 	if ( d > 0 && d < address.size() - 1 )
 		if ( address.at( address.size() - 1 ) != tokdns ) return ( true );
