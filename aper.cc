@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.24 2010/06/28 20:55:11 shollatz Exp $
+$Id: aper.cc,v 1.25 2010/06/29 17:18:19 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -167,6 +167,7 @@ public:
 	std::string address( void ) const { return ( _address ); }
 	void address( std::string a ) { _address = a; }
 	bool isvalidaddress( std::string address ) const;
+	std::string cleanup( std::string url );
 
 	void write( std::ostream &f );
 
@@ -196,7 +197,6 @@ typedef unsigned int linenum_type;
 std::string trimspace( std::string s, trimspec trim = ENDS );
 std::string split( std::string s, char c = tokcsv );
 std::string tolowercase( std::string s );
-std::string urlcleanup( std::string url );
 errstate errnotify( errstate err, std::string extrainfo = "", linenum_type line = 0 );
 
 bool loadaperdb( void );
@@ -587,7 +587,7 @@ bool loadaperlinks( std::istream *f )
 			iss >> address >> date;
 
 			APERlinks *node = new APERlinks;
-			address = urlcleanup( address );
+			address = node->cleanup( address );
 
 			errstate err = EOK;
 			if ( err == EOK && ! node->isvalidaddress( address ) )
@@ -665,7 +665,7 @@ bool loaduserreply( std::istream *f )
 	std::string s;
 	linenum_type line = 0;
 
-	while ( getline( *f , s ) )
+	while ( getline( *f, s ) )
 	{
 		++line;
 		s = trimspace( s, ALL );
@@ -742,7 +742,7 @@ bool loaduserlinks( std::istream *f )
 		iss >> address >> date;
 
 		APERlinks *node = new APERlinks;
-		address = urlcleanup( address );
+		address = node->cleanup( address );
 
 		errstate err = EOK;
 		if ( err == EOK && ! node->isvalidaddress( address ) )
@@ -988,6 +988,14 @@ bool APERreply::isvalidaddress( std::string address ) const
 				if ( p != 1 ) return ( false );
 			}
 
+// some may argue this violates RFCs since a host FQDN, terminating with a dot,
+// is valid syntax.  while this may be true, we need to make the user aware
+// by rejecting it since it could be a typo or something else. this also
+// facilitates some level of sanity with entries in the database since
+// 'a@b.c.' is nearly always 'a@b.c' though literally they're different and
+// would result in different entries in the database.  also, the use of FQDN
+// in a phish may be useful in indentifying phishware, so don't hide the fact
+// in an automated cleanup.
 			if ( host.at( host.size() - 1 ) != tokdns ) return ( true );
 		}
 	}
@@ -1056,36 +1064,100 @@ void APERlinks::write( std::ostream &f )
 //      APERlinks::isvalidaddress                  //
 /////////////////////////////////////////////////////
 // lame check of web host address.  full URL not validated in any way.
-// basically, some.thing.more ==> good format.
+// basically, some.host/more ==> good format.
 // there are no RFC-compliant checks (except one).
+// assumes address cleanup already done.
 
 bool APERlinks::isvalidaddress( std::string address ) const
 {
 	if ( address.empty() ) return ( false );
 
-// RFC1123 and RFC952 specify host names start with a letter or digit.
-	if ( ! isalnum( address[0] ) )
-	{
-		// some hosts begin with other symbols
-		std::string::size_type p = address.find_first_of( "-" );
-		if ( p != 0 ) return ( false );
-	}
-
-// assuming cleanup has already been done, check for embedded URLs.
+// check for embedded URLs.
 // this also catches misbehaved cut-and-pastes. :-)
 	if ( address.find( "://" ) != std::string::npos ) return ( false );
 
-	std::string::size_type d = address.find( tokdns );
+// check host part of url.  at this time we don't care about the rest.
+
+	std::string host = address;
+	std::string::size_type p = address.find_first_of( "/?#" );
+	if ( p != std::string::npos )
+		host = address.substr( 0, p );
+
+	if ( host.empty() ) return ( false );
+
+	std::string::size_type d = host.find( tokdns );
 	if ( d == std::string::npos ) return ( false );
 
-// try catching a typo...
-// FIX: disable this until we can look at the host part separately
-//	if ( address.find( ".." ) != std::string::npos ) return ( false );
+// RFC1123 and RFC952 specify host names start with a letter or digit.
+	if ( ! isalnum( host[0] ) )
+	{
+		// some hosts begin with other symbols
+		std::string::size_type p = host.find_first_of( "-" );
+		if ( p != 0 ) return ( false );
+	}
 
-	if ( d > 0 && d < address.size() - 1 )
-		if ( address.at( address.size() - 1 ) != tokdns ) return ( true );
+// try catching a typo
+	if ( host.find( ".." ) != std::string::npos ) return ( false );
+
+// see FQDN discussion in APERreply::isvalidaddress()
+	if ( host.at( host.size() - 1 ) != tokdns ) return ( true );
 
 	return ( false );
+}
+
+/////////////////////////////////////////////////////
+//      APERlinks::cleanup                         //
+/////////////////////////////////////////////////////
+// transform url to something sane. doesn't do much right now...
+
+std::string APERlinks::cleanup( std::string url )
+{
+	if ( url.empty() ) return ( url );
+
+	std::string::size_type p;
+
+// remove scheme
+// RFC3986 states the scheme can be uppercase but apps should produce
+// lowercase for consistency and documents that present schemes should
+// do so in lowercase.
+
+	std::string scheme;
+	std::string h( "://" );
+
+	p = url.find( h );
+	if ( p != std::string::npos )
+	{
+		std::string::size_type q = p + h.size();
+		std::string s = tolowercase( url.substr( 0, q ) );
+
+		// we only nuke ordinary web schemes at the beginning,
+		// not embedded URLs (those found as extra info, etc).
+		// address validators should flag a bad addr if :// is found.
+		if ( s.find( "http" + h ) == 0 || s.find( "https" + h ) == 0 )
+			url.erase( 0, q );
+	}
+
+// make host part ("authority" in RFC lingo) lowercase
+// RFC3986 specifies termination chars.
+
+	p = url.find_first_of( "/?#" );
+
+	if ( p != std::string::npos )
+	{
+		for ( std::string::size_type q = 0; q < p; ++q )
+			url[ q ] = tolower( url[ q ] );
+	}
+	else
+		url = tolowercase( url );
+
+// remove trailing slash
+
+	std::string::reverse_iterator ritr = url.rbegin();
+
+	if ( *ritr == '/' )
+		url.resize( url.find_last_of( *ritr ) );
+
+	return ( url );
 }
 
 /////////////////////////////////////////////////////
@@ -1198,59 +1270,4 @@ std::string tolowercase( std::string s )
 {
 	std::transform( s.begin(), s.end(), s.begin(), tolower );
 	return ( s );
-}
-
-/////////////////////////////////////////////////////
-//      urlcleanup                                 //
-/////////////////////////////////////////////////////
-// transform url to something sane. doesn't do much right now...
-
-std::string urlcleanup( std::string url )
-{
-	if ( url.empty() ) return ( url );
-
-	std::string::size_type p;
-
-// remove scheme
-// RFC3986 states the scheme can be uppercase but apps should produce
-// lowercase for consistency and documents that present schemes should
-// do so in lowercase.
-
-	std::string scheme;
-	std::string h( "://" );
-
-	p = url.find( h );
-	if ( p != std::string::npos )
-	{
-		std::string::size_type q = p + h.size();
-		std::string s = tolowercase( url.substr( 0, q ) );
-
-		// we only nuke ordinary web schemes at the beginning,
-		// not embedded URLs (those found as extra info, etc).
-		// address validators should flag a bad addr if :// is found.
-		if ( s.find( "http" + h ) == 0 || s.find( "https" + h ) == 0 )
-			url.erase( 0, q );
-	}
-
-// make host part ("authority" in RFC lingo) lowercase
-// RFC3986 specifies termination chars.
-
-	p = url.find_first_of( "/?#" );
-
-	if ( p != std::string::npos )
-	{
-		for ( std::string::size_type q = 0; q < p; ++q )
-			url[ q ] = tolower( url[ q ] );
-	}
-	else
-		url = tolowercase( url );
-
-// remove trailing slash
-
-	std::string::reverse_iterator ritr = url.rbegin();
-
-	if ( *ritr == '/' )
-		url.resize( url.find_last_of( *ritr ) );
-
-	return ( url );
 }
