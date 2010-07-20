@@ -695,6 +695,7 @@ help.ports.freehostia.com,20100630
 help.ports.freehostia.com/use/ports/form1.html,20100630
 helpdesk-support.4-all.org,20100624
 helpdesk-usoffice.4-all.org,20100709
+helpdesk-webmaster.4-all.org,20100720
 helpdesk012.4-all.org,20100618
 helpdesk904.4-all.org,20100621
 helpdeskonline.4-all.org,20100716
@@ -1196,6 +1197,7 @@ r.im/2jv8,20100510
 r.im/2lzu,20100712
 r.im/2m5m,20100716
 r.im/2m6o,20100717
+r.im/2mn0,20100720
 r42zt.9hz.com,20100520
 r4gxq.9hz.com,20100703
 rau6r.9hz.com,20091023
@@ -1479,7 +1481,7 @@ tnscoat.com/phpform/use/mextti/form1.html,20100527
 tnscoat.com/phpform/use/on/form1.html,20100702
 tnscoat.com/phpform/use/onl/form1.html,20100702
 tnscoat.com/phpform/use/onlineform1/form1.html,20100703
-tnscoat.com/phpform/use/onlineform4./form1.html,20100716
+tnscoat.com/phpform/use/onlineform4./form1.html,20100720
 tnscoat.com/phpform/use/phpform1/form1.html,20100715
 tnscoat.com/phpform/use/spdfg/form1.html,20100626
 tnscoat.com/phpform/use/upgrade1/form1.html,20100618
@@ -1892,6 +1894,8 @@ www.eformit.com/admin/liveform.aspx?ui=368&pi=1856&pkg=0,20100712
 www.eformit.com/admin/liveform.aspx?ui=395&pi=1908&pkg=0,20100709
 www.eformit.com/admin/liveform.aspx?ui=398&pi=1918&pkg=0,20100708
 www.eformit.com/admin/liveform.aspx?ui=407&pi=1935&pkg=0,20100719
+www.eformit.com/admin/liveform.aspx?ui=430&pi=1979&pkg=0,20100720
+www.eformit.com/admin/liveform.aspx?ui=449&pi=2008&pkg=0,20100720
 www.eformit.com/eform.aspx?ADMINDESK,20100528
 www.eformit.com/eform.aspx?Administrative,20091019
 www.eformit.com/eform.aspx?Alerthelpdesk,20100701
@@ -1901,6 +1905,7 @@ www.eformit.com/eform.aspx?DATABASE,20100610
 www.eformit.com/eform.aspx?DATABASEHELPDESK,20091129
 www.eformit.com/eform.aspx?HelpAlert,20100707
 www.eformit.com/eform.aspx?HelpAlert-Desk,20100716
+www.eformit.com/eform.aspx?Helpdesk-Alert,20100720
 www.eformit.com/eform.aspx?Management,20100521
 www.eformit.com/eform.aspx?Microsoft,20100501
 www.eformit.com/eform.aspx?Support,20100528
@@ -1922,7 +1927,7 @@ www.eformit.com/eform.aspx?cee4ab9205ff,20100715
 www.eformit.com/eform.aspx?cod,20100713
 www.eformit.com/eform.aspx?codi,20100716
 www.eformit.com/eform.aspx?codo,20100714
-www.eformit.com/eform.aspx?col102hfff,20100718
+www.eformit.com/eform.aspx?col102hfff,20100720
 www.eformit.com/eform.aspx?help,20091116
 www.eformit.com/eform.aspx?kontoform,20100702
 www.eformit.com/eform.aspx?loginadmin,20100708
@@ -1936,8 +1941,9 @@ www.eformit.com/eform.aspx?sysadmin,20100701
 www.eformit.com/eform.aspx?upgrade,20100330
 www.eformit.com/eform.aspx?validation,20100528
 www.eformit.com/eform.aspx?verification,20091124
-www.eformit.com/eform.aspx?wbbw4,20100719
+www.eformit.com/eform.aspx?wbbw4,20100720
 www.eformit.com/eform.aspx?webformslogin,20100625
+www.eformit.com/eform.aspx?webmasterupgradesystem,20100720
 www.eformit.com/eform.aspx?webtech,20100707
 www.elbowspace.com/servlets/cfd?xr4=&formts=2009-10-22%2015:11:11.266327,20091023
 www.elbowspace.com/updat/20100129090725704996.htm,20100129
@@ -2371,6 +2377,7 @@ www.my3q.com/go.php?url=helpdeskmanager/74647,20100421
 www.my3q.com/go.php?url=hheur/8227,20100319
 www.my3q.com/go.php?url=james12/4378,20100302
 www.my3q.com/go.php?url=jjfj1aye/89079,20100512
+www.my3q.com/go.php?url=mailboxconfirmation/80048,20100720
 www.my3q.com/go.php?url=maxrate/8674,20100511
 www.my3q.com/go.php?url=nedu/47549,20100403
 www.my3q.com/go.php?url=serviceaccount1/88782,20100320
