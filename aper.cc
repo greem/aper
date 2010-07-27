@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.25 2010/06/29 17:18:19 shollatz Exp $
+$Id: aper.cc,v 1.26 2010/07/27 17:16:32 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -885,6 +885,8 @@ APERnode::APERnode( void ) {}
 //
 // valid dates are between 20:45:52  UTC,  December  13,  1901
 // and 03:14:07 UTC,  January 19, 2038 .
+//
+// there is a lot of overkill here but it helps in strange ways.
 
 bool APERnode::isvaliddate( std::string date ) const
 {
@@ -905,6 +907,8 @@ bool APERnode::isvaliddate( std::string date ) const
 	int d( atoi( D.c_str() ) );
 
 	if ( y * m * d == 0 ) return ( false );
+	if ( m < 1 || m > 12 ) return ( false );
+	if ( d < 1 || d > 31 ) return ( false );
 
 	struct tm t;
 
