@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.26 2010/07/27 17:16:32 shollatz Exp $
+$Id: aper.cc,v 1.27 2011/03/15 15:10:13 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -1078,7 +1078,7 @@ bool APERlinks::isvalidaddress( std::string address ) const
 
 // check for embedded URLs.
 // this also catches misbehaved cut-and-pastes. :-)
-	if ( address.find( "://" ) != std::string::npos ) return ( false );
+//	if ( address.find( "://" ) != std::string::npos ) return ( false );
 
 // check host part of url.  at this time we don't care about the rest.
 
