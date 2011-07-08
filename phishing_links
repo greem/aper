@@ -1,4 +1,4 @@
-g#
+#
 # phishing_links is a list of generic forms used for e-mail account phishing
 #
 # The DATE is the last date a particular link was seen
@@ -30,6 +30,7 @@ g#
 0nline.kruxies.net/account/index.html,20110524
 0oczg.9hz.com,20100810
 0oh6s.9hz.com,20101219
+0ow62.9hz.com,20110708
 0psl.9hz.com,20100624
 0w1u.9hz.com,20110220
 10.30.139.245,20110315
