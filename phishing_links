@@ -7024,6 +7024,7 @@ mail.callem.com.sa/wumt/westernunion/asp/regLogin/index.html,20110121
 mail.finlands.net23.net/mail-login&account=verify.php&validate-account&upgrade.php=www.webmail.accountvalidation.com-verify-Email~Quota.php,20120408
 mail.ksmq.org/owa/auth/logon.aspx,20110510
 mail.lyonsins.com/quarantine,20100819
+mail.ryansupalla.com:2083/frontend/x3/mail/editquota.html?email=design&domain=ryansupalla.com&redirectdomain=ryansupalla.com,20120504
 mail.svn.azok.org/revalidate.php?webmail=net.au,20120210
 mail.tpb.com.vn/owa/redir.aspx?C00f0ace901c4a94bf62a614e43a3284&URL=http%3a%2f%2foutlooksowas.ucoz.es%2fWeb_Access.htm,20120308
 mail.tpb.com.vn/owa/redir.aspx?C=300f0ace901c4a94bf62a614e43a3284,20120308
@@ -7062,7 +7063,7 @@ maildata.ucoz.org/helpdesk.htm,20111212
 maildeskupdate.ucoz.com/helpdesk.htm,20110421
 maildeskupdate.ucoz.com/webmail.htm,20110421
 maildhesldp.ucoz.com/web.mht,20120119
-maildomainquota.onlinewebshop.net/verification/worker.php,20120502
+maildomainquota.onlinewebshop.net/verification/worker.php,20120504
 maileformneededupgradeverify.tk/webmail-verify,20120124
 mailerfingertracebackup.tk/webmail-verify,20120113
 mailerpusfeedbackmailer.tk/webmail-verify,20120106
@@ -10423,6 +10424,7 @@ system-administratoroffice1.tk,20111115
 system-adminmanager.tk,20120110
 system-helpdesk.jigsy.com,20110609
 system-helpdesk1.jigsy.com,20120502
+system-helpdesk1.tk,20120504
 system-migrate.ubb.cc,20120412
 system-support.jigsy.com,20110614
 system-supportteam.jigsy.com,20110823
