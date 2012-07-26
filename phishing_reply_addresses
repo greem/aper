@@ -363,7 +363,7 @@ abuse.t@live.com,A,20080819
 abuse0@yale.edu,B,20111027
 abuse123@yale.edu,B,20120606
 abuse222@gmail.com,A,20100112
-abuse@domain.com,E,20120726
+abuse@domain.com,AE,20120726
 abuse@educompany.com,B,20091026
 abuse@webmail.org,E,20110312
 abuse@webmaster.org,B,20110315
@@ -12366,6 +12366,7 @@ info@ig.com,B,20110807
 info@iibf.sdu.edu.tr,E,20110601
 info@iiiii.co.uk,A,20120310
 info@ikobo.com,B,20111123
+info@ilsalottodipenelope.it,E,20120725
 info@imf.org,B,20120206
 info@info-account.com,A,20110831
 info@info.al,E,20111004
