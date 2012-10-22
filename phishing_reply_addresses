@@ -45,8 +45,8 @@
 #     The date that the ADDRESS was last seen used as the reply address
 #     a phishing campaign. Only one DATE can be listed per line.
 #
-..@me.com,A,20121022
 -helpdesk@live.com,A,20080822
+..@me.com,A,20121022
 0000.anthony523@att.net,E,20120924
 00002010@att.net,AB,20101018
 0002009@att.net,B,20091218
@@ -3702,6 +3702,7 @@ azizal_sheriff@administrativos.com,A,20090617
 azrak@tekun.gov.my,E,20120417
 azubiria@irakasle.net,E,20100704
 b.barajas@ecisd.us,E,20120208
+b.de.lepper@zuidzorg.nl,E,20121022
 b.fial@kpnplanet.nl,E,20100105
 b.ghilardi1@nuigalway.ie,E,20090615
 b.lucarelli@uws.edu.au,E,20100324
@@ -7994,7 +7995,7 @@ devinebr@uwec.edu,E,20100414
 devonbebless@yahoo.ca,A,20090402
 dexktech@yahoo.com.hk,AB,20101004
 dexkwebinfo@yahoo.com.hk,A,20110418
-dexter.dixon@gpisd.org,E,201210224
+dexter.dixon@gpisd.org,E,20121022
 dezirs@irmail.ru,E,20120124
 dfarooqui@atlantaga.gov,A,20100919
 dfbaas@uams.edu,E,20120413
@@ -8169,6 +8170,7 @@ djruzica@eunet.rs,B,20110216
 djsuds1@ptd.net,B,20090705
 dk104ar@att.net,E,20120509
 dk_scott@hotmail.com,A,20090617
+dkaiper@losmedanos.edu,E,20121022
 dkamalongo@hotmail.com,B,20111226
 dkapenga@allegancounty.org,E,20111129
 dkaulen@sbcglobal.net,B,20100502
@@ -14414,6 +14416,7 @@ jaysma@bluffton.edu,E,20110531
 jazzyj7490@sbcglobal.net,B,20101018
 jb0061655@otc.edu,E,20110904
 jb22ir@student.lnu.se,E,20100213
+jb943@columbia.edu,E,20121022
 jbadenes@lmu.edu,B,20090129
 jbailey@stpetersce.rochdale.sch.uk,E,20120911
 jbailey@uwf.edu,E,20090809
