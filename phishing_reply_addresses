@@ -45,6 +45,7 @@
 #     The date that the ADDRESS was last seen used as the reply address
 #     a phishing campaign. Only one DATE can be listed per line.
 #
+..@me.com,A,20121022
 -helpdesk@live.com,A,20080822
 0000.anthony523@att.net,E,20120924
 00002010@att.net,AB,20101018
@@ -11149,6 +11150,7 @@ hcenter60@yahoo.com,A,20100718
 hchan@calstatela.edu,E,20090828
 hchaouch@optics.arizona.edu,B,20100926
 hchoukrane@hotmail.com,ABE,20100409
+hchriste@austincc.edu,B,20121022
 hcordova@peralta.edu,E,20110624
 hcunningham@madison.k12.al.us,E,20111112
 hcustomer@rocketmail.com,A,20110201
@@ -11383,7 +11385,7 @@ help@j-mail.info,A,20090519
 help@mail.com,AE,20120625
 help@mail2webmaster.com,A,20081027
 help@makeamove.nl,E,20090514
-help@me.com,E,20120625
+help@me.com,E,20121022
 help@partners.org,E,20110323
 help@support.com,E,20110207
 help@support.org,E,20110131
@@ -13125,7 +13127,7 @@ info@lee.com,E,20110821
 info@lf.com,B,20110807
 info@libr.ug.edu.gh,E,20120222
 info@lichtverlicht.nl,B,20110724
-info@live.com,ABE,20120926
+info@live.com,ABE,20121022
 info@llfang.com,B,20110817
 info@llorydsbnk.gmx,B,20110801
 info@lloydspacific.accountant.com,B,20111011
@@ -13936,7 +13938,7 @@ ithelpdesk@mail2webmaster.com,A,20081001
 ithelpdesk@strompost.at,AC,20090430
 ithelpdesk@strompost.info,A,20090630
 ithelpdesk@webmasters.com,E,20090622
-ithelpdeskcenter@gmail.com,B,20121016
+ithelpdeskcenter@gmail.com,BC,20121022
 ithelpdeskeo@mail2webmaster.com,A,20100301
 ithelpdesks@j-mail.info,A,20090408
 ithelpdesks@mail2webmaster.com,A,20090628
@@ -15971,6 +15973,7 @@ kfelton@btc.ctc.edu,E,20120514
 kfiddler@chaucer.ac.uk,E,20110617
 kfnzamub@colby.edu,E,20121006
 kfox@sagchip.org,E,20110527
+kfscholly@ship.edu,E,20121022
 kfunderburk@carthageisd.org,E,20100609
 kfunk@nthurston.k12.wa.us,E,20110909
 kgaston@svc.edu,E,20110304
@@ -29434,6 +29437,7 @@ v.robinson@ulster.ac.uk,E,20100603
 v.vander.ltd@googlemail.com,E,20111105
 vabrad01@louisville.edu,B,20100302
 vacher@usf.edu,E,20120902
+vadhana.sub@mahidol.ac.th,E,20121022
 vajones@duncanvilleisd.org,E,20100901
 vakiftin@mahamail.com,E,20101114
 valcamp1@umd.edu,E,20110801
