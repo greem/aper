@@ -16,7 +16,7 @@
 # IMPORTANT NOTE: This version has *not* been extensively tested.
 # ---------------------------------------------------------------
 # Name: sa-phish-gen
-# Version: 1.1
+# Version: 1.1.1
 # Description: This script (sa-phish-gen) is intended to parse the list from
 # the anti-phishinge-email-reply project into a SpamAssassin config file (.cf)
 # See http://code.google.com/p/anti-phishing-email-reply/
@@ -27,6 +27,10 @@
 #################################################################
 # ChangeLog
 #
+# 1.1.1 - change to mailaddrreg / sed line submitted by Todd Aiken 09/12/2012
+# Script now looks for the following symbols in an address and prepends
+# them with a backslash:
+# . _ ? + \ * & = # @ ( )
 # 1.1 - changes submitted by Thomas Bullinger 20/03/2012
 # http://consult.btoy1.net
 #
@@ -48,7 +52,7 @@ BASESCORE="10"; BASESCORE=0.5
 
 mailaddrreg() {
 	# Convert e-mail address from me@domain.com to me\@domain\.com
-	saaddr=$(echo $addr | sed s/'\.'/'\\.'/g | sed s/'\@'/'\\@'/g)
+	 saaddr=$(echo "$addr" | sed -e 's|[\.\/\_\?\+\\\*\&\=\#\@\(\)]|\\&|g')
 }
 
 createreplytotest() {
