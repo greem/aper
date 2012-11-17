@@ -16,170 +16,167 @@
 # IMPORTANT NOTE: This version has *not* been extensively tested.
 # ---------------------------------------------------------------
 # Name: sa-phish-gen
-# Version: 1.0
+# Version: 1.1
 # Description: This script (sa-phish-gen) is intended to parse the list from
 # the anti-phishinge-email-reply project into a SpamAssassin config file (.cf)
 # See http://code.google.com/p/anti-phishing-email-reply/
 # Usage: ./sa-phish-gen <filename>  
 # Example usage:./sa-phish-gen phishing_reply_addresses > sa-phish.cf
+#
+#
+#################################################################
+# ChangeLog
+#
+# 1.1 - changes submitted by Thomas Bullinger 20/03/2012
+# http://consult.btoy1.net
+#
+# Adapted to personal taste and BASH specific constructs
+# Added rules for type "E" records
+#################################################################
 
 ###################################################################
-# Adjust these values to your own desire. They are set *very* high.
+# Adjust these values to your own desire. The defaults are set *very* high.
 #
-ONEDAYSCORE="1000"
-ONEWEEKSCORE="500"
-ONEMONTHSCORE="200"
-THREEMONTHSCORE="100"
-SIXMONTHSCORE="50"
-ONEYEARSCORE="20"
+ONEDAYSCORE="1000"; ONEDAYSCORE=5
+ONEWEEKSCORE="500"; ONEWEEKSCORE=4
+ONEMONTHSCORE="200"; ONEMONTHSCORE=3
+THREEMONTHSCORE="100"; THREEMONTHSCORE=2
+SIXMONTHSCORE="50"; SIXMONTHSCORE=1
+ONEYEARSCORE="20"; ONEYEARSCORE=0.75
 # This score should only get used for over 1 year old.
-BASESCORE="10"
+BASESCORE="10"; BASESCORE=0.5
 
 mailaddrreg() {
 	# Convert e-mail address from me@domain.com to me\@domain\.com
-       saaddr=$(echo $addr | sed s/'\.'/'\\.'/g | sed s/'\@'/'\\@'/g)
-       }
+	saaddr=$(echo $addr | sed s/'\.'/'\\.'/g | sed s/'\@'/'\\@'/g)
+}
 
 createreplytotest() {
 	mailaddrreg;
 	# This should deal with those with a Reply-To or other header
 	# containing the listed e-mail address
 	# Results containing the Type A
-	echo "header SA_PHISH_GEN_A_$value reply-to =~ /$saaddr/i" 
-	echo "score SA_PHISH_GEN_A_$value $score"
-	echo "describe SA_PHISH_GEN_A_$value $addr is listed in http://code.google.com/p/anti-phishing-email-reply" 
-        }
+	echo "# $addr is listed in a Reply-To header"
+	echo "header SA_PHISH_GEN_REPLYTO_$value reply-to =~ /$saaddr/i" 
+	echo "score SA_PHISH_GEN_REPLYTO_$value $score"
+	echo "describe SA_PHISH_GEN_REPLYTO_$value $addr is listed in http://code.google.com/p/anti-phishing-email-reply" 
+}
 
 createfromtest() {
-       mailaddrreg;
-       # This should deal with those with a From header
-       # containing the listed e-mail address
-       # Results containing the Type B
-	echo "header SA_PHISH_GEN_B_$value From =~ /$saaddr/i" 
-	echo "score SA_PHISH_GEN_B_$value $score" 
-	echo "describe SA_PHISH_GEN_B_$value $addr is listed in http://code.google.com/p/anti-phishing-email-reply" 
-        }
+	mailaddrreg;
+	# This should deal with those with a From header
+	# containing the listed e-mail address
+	# Results containing the Type B
+	echo "# $addr is listed in a From header"
+	echo "header SA_PHISH_GEN_FROM_$value From =~ /$saaddr/i" 
+	echo "score SA_PHISH_GEN_FROM_$value $score" 
+	echo "describe SA_PHISH_GEN_FROM_$value $addr is listed in http://code.google.com/p/anti-phishing-email-reply" 
+}
 
 createbodytest() {
-       mailaddrreg;
-       # This should deal with those with the content/body
-       # containing the list e-mail address
-       # Results containing the Type C
-       echo "body SA_PHISH_GEN_C_$value /\b$saaddr\b/i" 
-       echo "score SA_PHISH_GEN_C_$value $score" 
-       echo "describe SA_PHISH_GEN_C_$value $addr is listed in http://code.google.com/p/anti-phishing-email-reply" 
-        }
+	mailaddrreg;
+	# This should deal with those with the content/body
+	# containing the list e-mail address
+	# Results containing the Type C or D
+	echo "# $addr is listed in the email body"
+	echo "body SA_PHISH_GEN_BODY_$value /\b$saaddr\b/i" 
+	echo "score SA_PHISH_GEN_BODY_$value $score" 
+	echo "describe SA_PHISH_GEN_BODY_$value $addr is listed in http://code.google.com/p/anti-phishing-email-reply" 
+}
+
+createinvalidtest() {
+	mailaddrreg;
+	# This should deal with those addresses which might
+	# receive replies it were not intended to receive
+	# the replies.
+	# Results containing the Type E
+	echo "# $addr is very likely invalid"
+	echo "body SA_PHISH_GEN_INVALID_$value /\b$saaddr\b/i" 
+	echo "score SA_PHISH_GEN_INVALID_$value 0.05" 
+	echo "describe SA_PHISH_GEN_INVALID_$value $addr is listed in http://code.google.com/p/anti-phishing-email-reply" 
+}
+
 # This function uses the Last Seen date to determine a score.
 datescorer() {
 	# Takes the date from the list and converts it to EPOCH/Unix time
-        thedate=`echo $line | awk -F\, '{print $3}'`
-        dateinepoch=`date --date=$thedate +%s`
+	dateinepoch=$(date --date=$thedate +%s)
 	# Todays date in EPOCH/Unix time
-        todaydate=`date +%s`
+	todaydate=$(date +%s)
 	# Some definitions of - very rough.
-        oneday=$(($todaydate - 86400))
-        oneweek=$(($todaydate - (7*86400)))
-        onemonth=$(($todaydate - (28*86400)))
-        threemonth=$(($todaydate - (72*86400)))
-        sixmonth=$(($todaydate - (182*86400)))
-        oneyear=$(($todaydate - (365*86400)))
+	oneday=$(($todaydate - 86400))
+	oneweek=$(($todaydate - (7*86400)))
+	onemonth=$(($todaydate - (28*86400)))
+	threemonth=$(($todaydate - (72*86400)))
+	sixmonth=$(($todaydate - (182*86400)))
+	oneyear=$(($todaydate - (365*86400)))
 	# Set the Base score
 	# Anything over year should get this score.
-        score=$BASESCORE
+	score=$BASESCORE
 	# Now check if the listed date is greater than than
-	# One year ago.
-        if [ $dateinepoch -ge $oneyear ]; then
-        score=$ONEYEARSCORE
-        fi
-	# Six Months ago..
-        if [ $dateinepoch -ge $sixmonth ]; then
-        score=$SIXMONTHSCORE
-        fi
-        if [ $dateinepoch -ge $threemonth ]; then
-        score=$THREEMONTHSCORE
-        fi
-        if [ $dateinepoch -ge $onemonth ]; then
-        score=$ONEMONTHSCORE
-	fi
-        if [ $dateinepoch -ge $oneweek ]; then
-        score=$ONEWEEKSCORE
-        fi
 	# One day ago...
-        if [ $dateinepoch -ge $oneday ]; then
-        score=$ONEDAYSCORE
+	if [ $dateinepoch -ge $oneday ]; then
+		score=$ONEDAYSCORE
+		return
         fi
-        }
+	# One week ago...
+	if [ $dateinepoch -ge $oneweek ]; then
+		score=$ONEWEEKSCORE
+		return
+	fi
+	# One month ago...
+	if [ $dateinepoch -ge $onemonth ]; then
+		score=$ONEMONTHSCORE
+		return
+	fi
+	# Three months ago...
+	if [ $dateinepoch -ge $threemonth ]; then
+		score=$THREEMONTHSCORE
+		return
+	fi
+	# Six Months ago..
+	if [ $dateinepoch -ge $sixmonth ]; then
+		score=$SIXMONTHSCORE
+		return
+	fi
+	# One year ago.
+	if [ $dateinepoch -ge $oneyear ]; then
+		score=$ONEYEARSCORE
+		return
+	fi
+}
 
 # Main body of code.
 
-exec<$1
+# Get the newest list of phishing reply addresses
+wget -q 'https://aper.svn.sourceforge.net/svnroot/aper/phishing_reply_addresses' -O /tmp/phishing_reply_addresses
 
 value=0
-while read line
+awk '!/#/ {gsub(/,/," "); print}' /tmp/phishing_reply_addresses | while read addr type thedate
 do
-	# 2nd Column - Type
-	commentcheck=`echo $line | cut -b1`;
-	if [ "$commentcheck" != "#" ] 
-	then
-	# Loop count because we don't need to count comments! :)
-	value=`expr $value + 1`;
-        type=`echo $line | awk -F\, '{print $2}'`;
-	# 1st Column - E-mail address
-        addr=`echo $line | awk -F\, '{print $1}'`;
+	# Loop count for unique rules
+	value=$(($value + 1));
 	# Call scoring function
         datescorer;
 
 	# This choose what lines we create
 	# in somone instances we create more than one
-        # We don't really have a test for D (obfuscated in body)
-	case "$type" in A)
-        createreplytotest;
-        ;;
-	B)
-        createfromtest;
-        ;;
-        C)
-        createbodytest;
-        ;;
-        D)
-        createbodytest;
-        ;;
-        AB)
-        createreplytotest;
-        createfromtest;
-        ;;
-	AC)
-	createreplytotest;
-	createbodytest;
-	;;
-	AD)
-	createreplytotest;
-	createbodytest;
-	;;
-        ABC)
-        createreplytotest;
-        createfromtest;
-        createbodytest;
-        ;;
-        ABCD)
-	createreplytotest;
-        createfromtest;
-        createbodytest;
-        ;;
-        BC)
-        createfromtest;
-        createbodytest;
-        ;;
-        BCD)
-        createfromtest;
-        createbodytest;
-        ;;
-        CD)
-        createbodytest;
-        ;;
-        esac
+       	# We don't really have a test for D (obfuscated in body)
+	if [[ $type =~ A ]]; then
+       		createreplytotest;
+	fi
+        if [[ $type =~ B ]]; then
+       		createfromtest;
+	fi
+	if [[ $type =~ C ]]; then
+       		createbodytest;
+	fi
+	if [[ $type =~ D ]]; then
+	        createbodytest;
+	fi
+	if [[ $type =~ E ]]; then
+	        createinvalidtest;
 	fi
 done
 
-
-
+# We are done
+exit 0
