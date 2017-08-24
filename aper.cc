@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2010 University of Minnesota.  All rights reserved.
-$Id: aper.cc,v 1.27 2011/03/15 15:10:13 shollatz Exp $
 
 	aper.cc - add bulk APER formated addresses to text databases
 	20090619.1532 s.a.hollatz <shollatz@d.umn.edu>
@@ -50,6 +49,7 @@ Copyright (C) 2010 University of Minnesota.  All rights reserved.
 #include <vector>
 #include <map>
 #include <set>
+#include <new>
 #include <sstream>
 #include <bitset>
 #include <algorithm>
@@ -96,6 +96,7 @@ enum errstate
 	EAPERDB,	// cannot load APER database
 	EUSERDB,	// cannot load user database
 	EWAPERDB,	// cannot write APER database
+	EMEM,		// memory allocation problem
 	EUNKNOWN	// we shouldn't need this, but...
 };
 
@@ -195,7 +196,7 @@ typedef std::map<std::string, APERnode *> APERdb;
 typedef std::vector<std::string> Comments;
 typedef unsigned int linenum_type;
 
-std::string trimspace( std::string s, trimspec trim = ENDS );
+std::string trimspace( std::string &s, trimspec trim = ENDS );
 std::string split( std::string s, char c = tokcsv );
 std::string tolowercase( std::string s );
 errstate errnotify( errstate err, std::string extrainfo = "", linenum_type line = 0 );
@@ -355,7 +356,7 @@ bool loadaperreply( std::istream *f )
 	while ( getline( *f, s ) )
 	{
 		++line;
-		s = trimspace( s, ENDS );
+		trimspace( s, ENDS );
 		if ( s.empty() ) continue;
 
 		if ( s[0] == tokcomment )
@@ -370,7 +371,7 @@ bool loadaperreply( std::istream *f )
 		{
 			if ( s[0] == tokcomment ) continue;
 
-			s = trimspace( s, ENDS );
+			trimspace( s, ENDS );
 			if ( s.empty() ) continue;
 
 			std::string address, addrt, date;
@@ -378,9 +379,9 @@ bool loadaperreply( std::istream *f )
 			std::istringstream iss( split( s ) );
 				iss >> address >> addrt >> date;
 
-			APERreply *node = new APERreply;
+			APERreply *node = new (std::nothrow) APERreply;
 
-			errstate err = EOK;
+			errstate err = ( node ) ? EOK : EMEM;
 			if ( err == EOK && ! node->isvalidaddress( address ) )
 				err = errnotify( EADDRESS, address, line );
 			if ( err == EOK && ! node->isvalidaddrtype( addrt ) )
@@ -434,7 +435,7 @@ bool setapercleared( std::istream *f )
 	while ( getline( *f, s ) )
 	{
 		++line;
-		s = trimspace( s, ENDS );
+		trimspace( s, ENDS );
 		if ( s.empty() ) continue;
 		if ( s[0] == tokcomment ) continue;
 
@@ -442,9 +443,9 @@ bool setapercleared( std::istream *f )
 		std::istringstream iss( split( s ) );
 		iss >> address >> date;
 
-		APERreply *node = new APERreply;
+		APERreply *node = new (std::nothrow) APERreply;
 		
-		errstate err = EOK;
+		errstate err = ( node ) ? EOK : EMEM;
 		if ( err == EOK && ! node->isvalidaddress( address ) )
 			err = errnotify( EADDRESS, address, line );
 		if ( err == EOK && ! node->isvaliddate( date ) )
@@ -493,7 +494,7 @@ bool loadapercleared( std::istream *f )
 	while ( getline( *f, s ) )
 	{
 		++line;
-		s = trimspace( s, ENDS );
+		trimspace( s, ENDS );
 		if ( s.empty() ) continue;
 
 		if ( s[0] == tokcomment )
@@ -508,7 +509,7 @@ bool loadapercleared( std::istream *f )
 		{
 			if ( s[0] == tokcomment ) continue;
 
-			s = trimspace( s, ENDS );
+			trimspace( s, ENDS );
 			if ( s.empty() ) continue;
 
 			std::string address, date;
@@ -516,9 +517,9 @@ bool loadapercleared( std::istream *f )
 			std::istringstream iss( split( s ) );
 			iss >> address >> date;
 
-			APERcleared *node = new APERcleared;
+			APERcleared *node = new (std::nothrow) APERcleared;
 
-			errstate err = EOK;
+			errstate err = ( node ) ? EOK : EMEM;
 			if ( err == EOK && ! node->isvalidaddress( address ) )
 				err = errnotify( EADDRESS, address, line );
 			if ( err == EOK && ! node->isvaliddate( date ) )
@@ -564,7 +565,7 @@ bool loadaperlinks( std::istream *f )
 	while ( getline( *f, s ) )
 	{
 		++line;
-		s = trimspace( s, ENDS );
+		trimspace( s, ENDS );
 		if ( s.empty() ) continue;
 
 		if ( s[0] == tokcomment )
@@ -579,7 +580,7 @@ bool loadaperlinks( std::istream *f )
 		{
 			if ( s[0] == tokcomment ) continue;
 
-			s = trimspace( s, ENDS );
+			trimspace( s, ENDS );
 			if ( s.empty() ) continue;
 
 			std::string address, date;
@@ -587,10 +588,18 @@ bool loadaperlinks( std::istream *f )
 			std::istringstream iss( split( s ) );
 			iss >> address >> date;
 
-			APERlinks *node = new APERlinks;
-			address = node->cleanup( address );
-
+			APERlinks *node = new (std::nothrow) APERlinks;
 			errstate err = EOK;
+
+			if ( node )
+			{
+				address = node->cleanup( address );
+			}
+			else
+			{
+				err = EMEM;
+			}
+
 			if ( err == EOK && ! node->isvalidaddress( address ) )
 				err = errnotify( EADDRESS, address, line );
 			if ( err == EOK && ! node->isvaliddate( date ) )
@@ -669,7 +678,7 @@ bool loaduserreply( std::istream *f )
 	while ( getline( *f, s ) )
 	{
 		++line;
-		s = trimspace( s, ALL );
+		trimspace( s, ALL );
 		if ( s.empty() ) continue;
 		if ( s[0] == tokcomment ) continue;
 			
@@ -678,9 +687,9 @@ bool loaduserreply( std::istream *f )
 		std::istringstream iss( split( s ) );
 		iss >> address >> addrt >> date;
 
-		APERreply *node = new APERreply;
+		APERreply *node = new (std::nothrow) APERreply;
 
-		errstate err = EOK;
+		errstate err = ( node ) ? EOK : EMEM;
 		if ( err == EOK && ! node->isvalidaddress( address ) )
 			err = errnotify( EADDRESS, address, line );
 		if ( err == EOK && ! node->isvalidaddrtype( addrt ) )
@@ -742,10 +751,18 @@ bool loaduserlinks( std::istream *f )
 		std::istringstream iss( split( s ) );
 		iss >> address >> date;
 
-		APERlinks *node = new APERlinks;
-		address = node->cleanup( address );
-
+		APERlinks *node = new (std::nothrow) APERlinks;
 		errstate err = EOK;
+
+		if ( node )
+		{
+			address = node->cleanup( address );
+		}
+		else
+		{
+			err = EMEM;
+		}
+
 		if ( err == EOK && ! node->isvalidaddress( address ) )
 			err = errnotify( EADDRESS, address, line );
 		if ( err == EOK && ! node->isvaliddate( date ) )
@@ -788,7 +805,7 @@ bool loadusercleared( std::istream *f )
 	while ( getline( *f, s ) )
 	{
 		++line;
-		s = trimspace( s, ENDS );
+		trimspace( s, ENDS );
 		if ( s.empty() ) continue;
 		if ( s[0] == tokcomment ) continue;
 
@@ -797,9 +814,9 @@ bool loadusercleared( std::istream *f )
 		std::istringstream iss( split( s ) );
 		iss >> address >> date;
 
-		APERcleared *node = new APERcleared;
+		APERcleared *node = new (std::nothrow) APERcleared;
 
-		errstate err = EOK;
+		errstate err = ( node ) ? EOK : EMEM;
 		if ( err == EOK && ! node->isvalidaddress( address ) )
 			err = errnotify( EADDRESS, address, line );
 		if ( err == EOK && ! node->isvaliddate( date ) )
@@ -1197,9 +1214,9 @@ bool APERcleared::isvalidaddress( std::string address ) const
 /////////////////////////////////////////////////////
 // no cleverness here, just plain brute force trimming.
 
-std::string trimspace( std::string s, trimspec trim )
+std::string trimspace( std::string &s, trimspec trim )
 {
-	if ( s.empty() ) return ( s );
+	if ( s.empty() ) return s;
 
 	switch ( trim )
 	{
@@ -1252,7 +1269,7 @@ std::string trimspace( std::string s, trimspec trim )
 			break;
 	}
 
-	return ( s );
+	return s;
 }
 
 /////////////////////////////////////////////////////
@@ -1262,7 +1279,7 @@ std::string trimspace( std::string s, trimspec trim )
 
 std::string split( std::string s, char c )
 {
-	s = trimspace( s, ALL );
+	trimspace( s, ALL );
 	std::replace( s.begin(), s.end(), c, toksplit );
 	return ( s );
 }
