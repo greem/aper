@@ -58,6 +58,7 @@ Copyright (C) 2010 University of Minnesota.  All rights reserved.
 #include <cstdlib>
 #include <time.h>
 #include <cstdio>
+#include <unistd.h>
 
 //=================================================================
 // TWEEKABLES
